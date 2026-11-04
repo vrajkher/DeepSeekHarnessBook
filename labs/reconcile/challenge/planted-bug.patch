@@ -1,0 +1,11 @@
+--- a/reconcile/src/reconcile.ts
++++ b/reconcile/src/reconcile.ts
+@@ -167,7 +167,7 @@
+   tally = tally.filter(x => !used.has(x))
+ 
+   // R2 / A1: amount within the date window.
+-  const byAmount = components(bank, tally, (b, t) => b.amount === t.amount && dayDistance(b.date, t.date) <= windowDays)
++  const byAmount = components(bank, tally, (b, t) => Math.abs(b.amount) === Math.abs(t.amount) && dayDistance(b.date, t.date) <= windowDays)
+   for (const c of byAmount) {
+     const all = [...c.bank, ...c.tally]
+     all.forEach(x => used.add(x))

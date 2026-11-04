@@ -14,13 +14,13 @@
 #12 request/header reason=initial model=deepseek-official/deepseek-flash tools=25
 #13 request/context {"provider":"deepseek-official","model":"deepseek-flash","contextWindow":1048576,"systemPromptUpdate":"in-history"}
 #14 session/title {"title":"આ repositoryનું README વાં","messageSeqs":[8],"source":{"kind":"fallback"}}
-#15 session-log-deepseek/delivery-accepted {"sessionId":"session-8cb6612a-babe-4f0a-9aba-a2256e463489","sessionFormatVersion":4,"throughSeq":14}
+#15 session-log-deepseek/delivery-accepted {"sessionId":"session-fecb32c4-7cfd-4beb-adde-047e0bf5161a","sessionFormatVersion":4,"throughSeq":14}
 #16 assistant/message content=[{"type":"tool-call","id":"mock-call-1","name":"read","arguments":"{\"file_path\":\"README.md\"}"}] streamChunks=6
 #17 tool/call read {"file_path":"README.md"}
-#18 tool/result isError=undefined content=
+#18 tool/result isError=false code=- content=[{"type":"text","text":"<path><harness>/…
 #19 step/end {"turn":1,"step":1}
 #20 step/start {"turn":1,"step":2}
-#21 session-log-deepseek/delivery-accepted {"sessionId":"session-8cb6612a-babe-4f0a-9aba-a2256e463489","sessionFormatVersion":4,"throughSeq":20}
+#21 session-log-deepseek/delivery-accepted {"sessionId":"session-fecb32c4-7cfd-4beb-adde-047e0bf5161a","sessionFormatVersion":4,"throughSeq":20}
 #22 assistant/message content=[{"type":"text","text":"README નો સાર: DeepSeek Harness એ plugin આધારિત agent harness છે."}] streamChunks=5
 #23 step/end {"turn":1,"step":2}
 #24 turn/end {"turn":1,"reason":{"kind":"completed"}}

@@ -20,7 +20,7 @@ for (const [i, line] of text.split('\n').filter(Boolean).entries()) {
   if (type === 'user/message') detail = `source=${short(data?.source ?? data?.message?.source, 60)} content=${short(data?.content ?? data?.message?.content)}`
   else if (type === 'assistant/message') detail = `content=${short(data?.message?.content)} streamChunks=${data?.stream?.chunks?.length ?? data?.stream?.length ?? '?'}`
   else if (type === 'tool/call') detail = `${data.name} ${data.arguments}`
-  else if (type === 'tool/result') detail = `isError=${data?.result?.isError ?? data?.isError} content=${short(data?.result?.content ?? data?.content, 100)}`
+  else if (type === 'tool/result') detail = `isError=${data?.message?.isError ?? false} code=${data?.error?.code ?? '-'} content=${short(data?.message?.content, 100)}`
   else if (type === 'request/header') detail = `reason=${data.reason} model=${data?.header?.config?.provider}/${data?.header?.config?.model} tools=${data?.header?.tools?.length ?? 0}`
   else detail = short(data)
   console.log(`#${seq} ${type} ${detail}`)

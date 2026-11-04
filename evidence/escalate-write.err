@@ -1,0 +1,36 @@
+[trace +  143ms] session/event #0 permission/preset
+[trace +  144ms] session/event #1 sandbox/mode
+[trace +  144ms] session/event #2 approval/policy
+[trace +  146ms] session/event #3 agent/inbox/spliced
+[trace +  148ms] session/event #4 turn/start {"turn":1}
+[trace +  148ms] session/event #5 agent/inbox/spliced
+[trace +  255ms] session/event #6 step/start {"turn":1,"step":1}
+[trace +  265ms] session/event #7 system/message
+[trace +  267ms] session/event #8 user/message
+[trace +  267ms] session/event #9 user/message
+[trace +  268ms] session/event #10 user/message
+[trace +  268ms] session/event #11 user/message
+[trace +  271ms] session/event #12 request/header
+[trace +  271ms] session/event #13 request/context
+[trace +  272ms] llm/stream call #1 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  272ms] live  stream start turn=1 step=1
+[trace +  274ms] session/event #14 session/title
+[trace +  322ms] session/event #15 session-log-deepseek/delivery-accepted
+[trace +  333ms] session/event #16 assistant/message
+[trace +  333ms] live  stream end chunks=7 -> assistant/message #16
+[trace +  334ms] session/event #17 tool/call name=write arguments={"file_path":"/etc/book-test.txt","content":"x","sandbox_permissions":"danger-full-access","justification":"test"}
+[trace +  341ms] session/event #18 approval/asked
+[trace +  341ms] session/event #19 approval/decided
+[trace +  343ms] tools/result write isError=true chars=105
+[trace +  343ms] session/event #20 tool/result
+[trace +  344ms] session/event #21 step/end {"turn":1,"step":1}
+[trace +  360ms] session/event #22 step/start {"turn":1,"step":2}
+[trace +  362ms] llm/stream call #2 deepseek-official/deepseek-flash messages=7 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  362ms] live  stream start turn=1 step=2
+[trace +  372ms] session/event #23 session-log-deepseek/delivery-accepted
+[trace +  375ms] session/event #24 assistant/message
+[trace +  376ms] live  stream end chunks=13 -> assistant/message #24
+[trace +  376ms] session/event #25 step/end {"turn":1,"step":2}
+[trace +  376ms] session/event #26 turn/end reason={"kind":"completed"}
+[trace +  419ms] dispose: total llm/stream calls = 2
+dsh exit: 0

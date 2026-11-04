@@ -1,0 +1,37 @@
+dsh: warning: 1 entry did not activate
+book-csv-compare (file://<harness>/tmp/book-labs/csv-inspect/src/plugin.ts): ValidationError: invalid config:
+  - $.maxBytes expected number >= 0 but got -5 (at maxBytes)
+    at resolveConfig (<harness>/vendor/cordis/src/fiber.ts:58:11)
+    at <anonymous> (<harness>/vendor/cordis/src/events.ts:158:30)
+    at Object.apply (<harness>/vendor/cordis/src/reflect.ts:429:24)
+    at dispatch (<harness>/vendor/cordis/src/events.ts:258:22)
+    at Proxy.waterfall (<harness>/vendor/cordis/src/events.ts:260:12)
+    at Fiber.resolveConfig (<harness>/vendor/cordis/src/fiber.ts:678:26)
+    at Fiber.execute (<harness>/vendor/cordis/src/fiber.ts:255:31)
+    at <anonymous> (<harness>/vendor/cordis/src/fiber.ts:372:45)
+    at file://<harness>/tmp/book-home/profiles/headless/#book-csv-compare
+    at file://<harness>/tmp/book-home/profiles/headless/#include
+[trace +  142ms] session/event #0 permission/preset
+[trace +  143ms] session/event #1 sandbox/mode
+[trace +  143ms] session/event #2 approval/policy
+[trace +  145ms] session/event #3 agent/inbox/spliced
+[trace +  147ms] session/event #4 turn/start {"turn":1}
+[trace +  147ms] session/event #5 agent/inbox/spliced
+[trace +  255ms] session/event #6 step/start {"turn":1,"step":1}
+[trace +  259ms] session/event #7 system/message
+[trace +  260ms] session/event #8 user/message
+[trace +  262ms] session/event #9 user/message
+[trace +  262ms] session/event #10 user/message
+[trace +  262ms] session/event #11 user/message
+[trace +  265ms] session/event #12 request/header
+[trace +  265ms] session/event #13 request/context
+[trace +  266ms] llm/stream call #1 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  266ms] live  stream start turn=1 step=1
+[trace +  268ms] session/event #14 session/title
+[trace +  325ms] session/event #15 session-log-deepseek/delivery-accepted
+[trace +  336ms] session/event #16 assistant/message
+[trace +  336ms] live  stream end chunks=5 -> assistant/message #16
+[trace +  337ms] session/event #17 step/end {"turn":1,"step":1}
+[trace +  337ms] session/event #18 turn/end reason={"kind":"completed"}
+[trace +  384ms] dispose: total llm/stream calls = 1
+dsh exit: 0

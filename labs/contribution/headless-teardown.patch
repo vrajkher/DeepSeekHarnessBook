@@ -23,7 +23,7 @@ index bc98d7ae6b..dd34b3cf99 100644
      const outcome = summarize(agent.session, firstSeq)
 diff --git a/packages/bundle/headless/tests/teardown-flush.spec.ts b/packages/bundle/headless/tests/teardown-flush.spec.ts
 new file mode 100644
-index 0000000000..2fb11f43de
+index 0000000000..4d20d3d18a
 --- /dev/null
 +++ b/packages/bundle/headless/tests/teardown-flush.spec.ts
 @@ -0,0 +1,41 @@
@@ -56,8 +56,8 @@ index 0000000000..2fb11f43de
 +    internals.stderr = { write: (chunk: string) => { err += chunk; return true } }
 +    const exits: number[] = []
 +    ctx.provide('appExit', (code: number) => { exits.push(code) })
-+    const streaming = Promise.withResolvers<void>()
-+    ctx.on('agent/assistant-stream', ({ frame }) => { if (frame.type === 'chunk') streaming.resolve() })
++    const streaming = Promise.withResolvers<undefined>()
++    ctx.on('agent/assistant-stream', ({ frame }) => { if (frame.type === 'chunk') streaming.resolve(undefined) })
 +
 +    apply(ctx, { task: 'stall' })
 +    await streaming.promise

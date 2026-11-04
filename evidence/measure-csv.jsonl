@@ -1,0 +1,3 @@
+{"modelCalls":2,"calls":[{"purpose":"agent","messages":5},{"purpose":"agent","messages":7}],"toolCalls":1,"tools":[{"name":"csv_compare","ms":9.66,"isError":false}]}
+{"modelCalls":2,"calls":[{"purpose":"agent","messages":5},{"purpose":"agent","messages":7}],"toolCalls":1,"tools":[{"name":"csv_compare","ms":13.39,"isError":false}]}
+{"modelCalls":2,"calls":[{"purpose":"agent","messages":5},{"purpose":"agent","messages":7}],"toolCalls":1,"tools":[{"name":"csv_compare","ms":10.29,"isError":false}]}

@@ -12,11 +12,13 @@ cp -r labs <harness>/tmp/book-labs
 
 | Folder | Chapter | What it is |
 |---|---|---|
+| `cordis-basics/` | 0, 2 | `bin-with-logs.ts` (launcher that shows entry failures), deterministic tutorial ch.7 `greet` |
+| `greet/` | 4 | the user-guide `greet` tool with a configurable greeting |
 | `request-trace/` | 1, 3, 5 | `run-mock.sh` (keyless headless run), `trace-events.ts` observer, `capture-wire.ts`, `print-session.mjs` |
 | `csv-inspect/` | 4 | `csv_compare` read-only tool plugin, fixtures, tests |
 | `measure/` | 6 | `metrics.ts` model-call and tool-latency observer |
 | `contribution/` | 6 | `headless-teardown.patch`: worked contribution with regression test |
-| `reconcile/` | 7 | `reconcile_bank_tally` read-only tool plugin, synthetic fixtures, golden report, tests |
+| `reconcile/` | 7 | `reconcile_bank_tally` read-only tool plugin, synthetic fixtures, golden report, tests; `challenge/` planted bug + solution test |
 | `tsconfig.json` | all | strict type check of the labs against built harness declarations |
 
 Checks used in the book (run from `<harness>/tmp/book-labs`):
