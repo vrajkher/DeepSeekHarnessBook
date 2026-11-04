@@ -87,7 +87,7 @@ REJECTED [V1] bank L11: COLUMN_COUNT: expected 7 fields, found 3
 
 [plugin.ts](../labs/reconcile/src/plugin.ts) એ પ્રકરણ 4 નો જ નમૂનો છે, ત્રણ ઉમેરા સાથે:
 
-1. **Column names config માં** (`bankColumns`, `tallyColumns`) — બીજી bank નું export? Overlay માં names બદલો, code નહીં. ખોટું નામ હોય તો fail loud: integration test બતાવે છે કે `date: 'Posting Date'` હોય તો દરેક bank row `V1 invalid date ""` થાય.
+1. **Column names config માં** (`bankColumns`, `tallyColumns`) — બીજી bank નું export? Overlay માં names બદલો, code નહીં. ખોટું નામ હોય તો fail loud: matching શરૂ થાય તે પહેલાં `assertColumns` દરેક configured column header માં છે કે નહીં તે તપાસે છે. નહીં તો ખૂટતો `Debit` column ચૂપચાપ શૂન્ય ગણાય — ₹900 નું withdrawal ગાયબ થઈ entry ખોટી રીતે R1 match થાય.
 2. **`windowDays`** — config default 3, અને model દરેક call માં `window_days` (integer) આપી શકે. Negative value schema-level validation માં error બને છે (test).
 3. **Canonical JSON report** — દરેક `ResultRow` માં `status`, `rule`, `bankLines`, `tallyLines`, `amount`, `reason`. UI કે બીજો tool line-level trace આ JSON માંથી બનાવી શકે.
 
@@ -108,7 +108,7 @@ REJECTED [V1] bank L11: COLUMN_COUNT: expected 7 fields, found 3
 node --import tsx --test reconcile/test/*.test.ts
 ```
 
-🧪 `tests 10, pass 10` (rule-wise tests + golden + "every input row appears in exactly one result" invariant + determinism + 3 integration tests).
+🧪 `tests 12, pass 12` (rule-wise tests + golden + "every input row appears in exactly one result" invariant + determinism + missing-column અને invalid-header tests + 3 integration tests).
 
 Real headless turn:
 
@@ -179,7 +179,7 @@ cd tmp/book-labs && patch -p1 < reconcile/challenge/planted-bug.patch
 node --import tsx --test reconcile/test/*.test.ts
 ```
 
-🧪 **બધા 10 tests pass થાય છે.** એ જ challenge છે: test suite માં ખાડો છે.
+🧪 **બધા 12 tests pass થાય છે.** એ જ challenge છે: test suite માં ખાડો છે.
 3. Reviewer ના વર્ણન પરથી નિષ્ફળ થતો test લખો, bug શોધો, fix કરો, અને સાબિત કરો કે તમારો test fix વગર fail અને fix સાથે pass થાય છે.
 
 અમારો solution test: [challenge/sign.test.ts](../labs/reconcile/challenge/sign.test.ts) (🧪 bug સાથે `fail 1`: `actual: ['matched']`, fix સાથે `pass 1`). સમજૂતી: [પરિશિષ્ટ D — challenge](../appendix/D-lab-solutions.md#challenge).
@@ -210,11 +210,11 @@ node --import tsx --test reconcile/test/*.test.ts
 
 Fixture માં કંઈ બદલ્યા વગર `window_days: 0` સાથે tool ચલાવો. **ચલાવતા પહેલાં લખો:** matched, ambiguous, unmatched bank, unmatched tally ની સંખ્યા. જવાબ: [પરિશિષ્ટ D — Lab 7](../appendix/D-lab-solutions.md#lab-7).
 
-## નિષ્ફળતા: "બધી bank rows rejected"
+## નિષ્ફળતા: "tool કહે છે column ખૂટે છે"
 
-**લક્ષણ.** બીજી bank નું export આપ્યું; report માં દરેક bank row `REJECTED [V1] … invalid date ""`.
+**લક્ષણ.** બીજી bank નું export આપ્યું; tool result `Error: bank export is missing configured column(s) date="Txn Date"…; header is (…)`.
 
-**ટૂંકો નિદાન માર્ગ.** `""` નો અર્થ: configured date column header માં **નથી**, એટલે value ખાલી. Export નું header જુઓ, અને overlay માં `bankColumns.date` (અને બીજાં names) સુધારો. Integration test "column names come from config, so a renamed export fails loudly until configured" બરાબર આ લક્ષણ ઉત્પન્ન કરે છે.
+**ટૂંકો નિદાન માર્ગ.** Message માં છપાયેલું header export નું સાચું header છે. Overlay માં `bankColumns` (અથવા `tallyColumns`) ને તે names સાથે મેળવો. Integration test "column names come from config, so a renamed export fails loudly until configured" બરાબર આ લક્ષણ ઉત્પન્ન કરે છે. Header માં જ પુનરાવર્તિત નામ હોય તો error નહીં, પણ દરેક row `V1 INVALID_HEADER` તરીકે નકારાય છે.
 
 ## Mastery check
 

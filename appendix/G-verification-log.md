@@ -38,7 +38,7 @@
 | Greet tool config, csv_compare e2e, disable, bad config | `greet.err`, `csv.err`, `csv-disabled.err`, `csv-badcfg.err` |
 | Metrics (title off/on, csv) | `measure.jsonl`, `measure-csv.jsonl` |
 | Reconciliation e2e | `rec.err` |
-| Labs: 20/20 tests, `tsc` exit 0; challenge test fail/pass | પ્રકરણ 4, 7 |
+| Labs: 25/25 tests (+1 challenge test), `tsc` exit 0; challenge test fail/pass | પ્રકરણ 4, 7 |
 | Upstream suites: retry/tools/fs-sandbox 321/321; headless 136/136 (patch સાથે) | પ્રકરણ 5, 6 |
 | Contribution: lint, tsc, coverage 100%, `git apply --check` on pristine pinned tree | પ્રકરણ 6 |
 

@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { parseAmount, parseDate, normalizeRef } from '../src/normalize.ts'
 import { reconcileText, renderReconciliation } from '../src/reconcile.ts'
+import { ReconcileConfigError } from '../src/normalize.ts'
 
 const fx = (name: string): string => readFileSync(fileURLToPath(new URL(`../fixtures/${name}`, import.meta.url)), 'utf8')
 const BANK_HEADER = 'Txn Date,Value Date,Description,Ref No,Debit,Credit,Balance\n'
@@ -66,4 +67,19 @@ test('results are deterministic across runs', () => {
   const a = JSON.stringify(reconcileText(fx('bank-statement.csv'), fx('tally-bank-ledger.csv')))
   const b = JSON.stringify(reconcileText(fx('bank-statement.csv'), fx('tally-bank-ledger.csv')))
   assert.equal(a, b)
+})
+
+test('a missing monetary column is a configuration error, not a zero', () => {
+  const bank = 'Txn Date,Value Date,Description,Ref No,Withdrawal,Credit,Balance\n01-04-2026,,X,R9,900.00,100.00,\n'
+  const tally = 'Date,Particulars,Vch Type,Vch No,Instrument No,Debit,Credit\n1-Apr-2026,X,Receipt,R1,R9,100.00,\n'
+  assert.throws(() => reconcileText(bank, tally), (e: unknown) => e instanceof ReconcileConfigError && /debit="Debit"/.test(e.message))
+})
+
+test('an invalid header rejects its rows as V1 and still accounts for them', () => {
+  const bank = 'Txn Date,Txn Date,Description,Ref No,Debit,Credit,Balance\n01-04-2026,x,X,R9,,100.00,\n'
+  const tally = 'Date,Particulars,Vch Type,Vch No,Instrument No,Debit,Credit\n1-Apr-2026,X,Receipt,R1,R9,100.00,\n'
+  const r = reconcileText(bank, tally)
+  assert.equal(r.totals.bankRows, 1)
+  assert.deepEqual(r.results.filter(x => x.bankLines.includes(2)).map(x => x.rule), ['V1'])
+  assert.equal(r.totals.matched, 0)
 })

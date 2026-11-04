@@ -109,6 +109,28 @@ function normalizeRow(
   }
 }
 
+/** Raised when a configured column is absent from an export's header. */
+export class ReconcileConfigError extends Error {
+  readonly code = 'RECONCILE_CONFIG'
+}
+
+/**
+ * Require every configured column in the header, so a renamed export fails loudly
+ * instead of reading missing debit/credit cells as zero.
+ * @param source - which export, for the message.
+ * @param header - the parsed header names.
+ * @param cols - the configured column names.
+ * @throws ReconcileConfigError naming the missing columns and the header it saw.
+ */
+export function assertColumns(source: 'bank' | 'tally', header: string[], cols: BankColumns | TallyColumns): void {
+  const missing = Object.entries(cols).filter(([, name]) => !header.includes(name))
+  if (missing.length > 0) {
+    throw new ReconcileConfigError(
+      `${source} export is missing configured column(s) ${missing.map(([field, name]) => `${field}=${JSON.stringify(name)}`).join(', ')}; header is (${header.join(', ')})`,
+    )
+  }
+}
+
 export function normalizeBank(rows: CsvRow[], cols: BankColumns = DEFAULT_BANK_COLUMNS): (Txn | Rejection)[] {
   return rows.map(row => normalizeRow('bank', row, cols, 1))
 }

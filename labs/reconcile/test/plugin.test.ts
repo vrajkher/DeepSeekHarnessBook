@@ -38,8 +38,8 @@ test('the tool returns the same golden text as the library', async () => {
 
 test('column names come from config, so a renamed export fails loudly until configured', async () => {
   const bad = await run({ bankColumns: { date: 'Posting Date' } }, { bank_path: 'bank-statement.csv', tally_path: 'tally-bank-ledger.csv' })
-  // Every bank row is rejected because the configured date column is absent.
-  assert.match(bad.text, /REJECTED \[V1\] bank L2: invalid date ""/)
+  assert.equal(bad.result.isError, true)
+  assert.match(bad.text, /bank export is missing configured column\(s\) date="Posting Date"/)
 })
 
 test('a negative window is refused by the schema-validated arguments', async () => {

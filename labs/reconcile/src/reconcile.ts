@@ -17,9 +17,9 @@
  * The same inputs always produce the same, sorted report.
  */
 
-import { parseCsv, type CsvTable } from '../../csv-inspect/src/csv.ts'
+import { parseCsv, ROW_PROBLEM_CODES, type CsvTable } from '../../csv-inspect/src/csv.ts'
 import {
-  dayDistance, isTxn, normalizeBank, normalizeTally,
+  assertColumns, dayDistance, isTxn, DEFAULT_BANK_COLUMNS, DEFAULT_TALLY_COLUMNS, normalizeBank, normalizeTally,
   type BankColumns, type Rejection, type TallyColumns, type Txn,
 } from './normalize.ts'
 
@@ -106,6 +106,10 @@ function components(bank: Txn[], tally: Txn[], linked: (b: Txn, t: Txn) => boole
   return out
 }
 
+/** A header that parsed with no empty or repeated names. */
+const headerUsable = (table: CsvTable): boolean =>
+  table.header.length > 0 && !table.problems.some(p => p.code === 'EMPTY_HEADER' || p.code === 'DUPLICATE_HEADER')
+
 const lines = (txns: Txn[]): number[] => txns.map(t => t.line).sort((a, b) => a - b)
 
 /**
@@ -121,8 +125,14 @@ export function reconcileTables(bankTable: CsvTable, tallyTable: CsvTable, optio
   const results: ResultRow[] = []
 
   // V1: CSV-level and field-level rejections.
-  const bankNorm = normalizeBank(bankTable.rows, options.bankColumns)
-  const tallyNorm = normalizeTally(tallyTable.rows, options.tallyColumns)
+  // A header that parsed cleanly must contain every configured column; an invalid or
+  // missing header already refuses its rows as V1 problems.
+  const bankColumns = options.bankColumns ?? DEFAULT_BANK_COLUMNS
+  const tallyColumns = options.tallyColumns ?? DEFAULT_TALLY_COLUMNS
+  if (headerUsable(bankTable)) assertColumns('bank', bankTable.header, bankColumns)
+  if (headerUsable(tallyTable)) assertColumns('tally', tallyTable.header, tallyColumns)
+  const bankNorm = normalizeBank(bankTable.rows, bankColumns)
+  const tallyNorm = normalizeTally(tallyTable.rows, tallyColumns)
   const rejected = [
     ...rejectionsFrom('bank', bankTable), ...rejectionsFrom('tally', tallyTable),
     ...[...bankNorm, ...tallyNorm].filter((x): x is Rejection => !isTxn(x)),
@@ -206,8 +216,8 @@ export function reconcileTables(bankTable: CsvTable, tallyTable: CsvTable, optio
     windowDays,
     results,
     totals: {
-      bankRows: bankTable.rows.length + bankTable.problems.filter(p => p.code === 'COLUMN_COUNT').length,
-      tallyRows: tallyTable.rows.length + tallyTable.problems.filter(p => p.code === 'COLUMN_COUNT').length,
+      bankRows: bankTable.rows.length + bankTable.problems.filter(p => ROW_PROBLEM_CODES.has(p.code)).length,
+      tallyRows: tallyTable.rows.length + tallyTable.problems.filter(p => ROW_PROBLEM_CODES.has(p.code)).length,
       matched: results.filter(r => r.status === 'matched').length,
       ambiguous: results.filter(r => r.status === 'ambiguous').length,
       unmatchedBank: unmatchedBank.length,

@@ -19,9 +19,12 @@ export interface CsvRow {
 /** A row the reader refused, with the reason. */
 export interface CsvProblem {
   line: number
-  code: 'COLUMN_COUNT' | 'UNTERMINATED_QUOTE' | 'EMPTY_HEADER' | 'DUPLICATE_HEADER'
+  code: 'COLUMN_COUNT' | 'UNTERMINATED_QUOTE' | 'EMPTY_HEADER' | 'DUPLICATE_HEADER' | 'INVALID_HEADER'
   message: string
 }
+
+/** Problem codes that stand for one refused data row (as opposed to the header or the file). */
+export const ROW_PROBLEM_CODES: ReadonlySet<CsvProblem['code']> = new Set(['COLUMN_COUNT', 'INVALID_HEADER'])
 
 /** Parsed table: header, accepted rows, and refused rows. */
 export interface CsvTable {
@@ -92,8 +95,14 @@ export function parseCsv(text: string): CsvTable {
     else if (seen.has(name)) problems.push({ line: headerRecord.line, code: 'DUPLICATE_HEADER', message: `header repeats column "${name}"` })
     seen.add(name)
   }
+  // An empty or repeated column name makes every row ambiguous, so no row is accepted.
+  const headerInvalid = problems.length > 0
   const rows: CsvRow[] = []
   for (const record of nonBlank.slice(1)) {
+    if (headerInvalid) {
+      problems.push({ line: record.line, code: 'INVALID_HEADER', message: `row refused because the header on line ${headerRecord.line} is invalid` })
+      continue
+    }
     if (record.fields.length !== header.length) {
       problems.push({
         line: record.line,

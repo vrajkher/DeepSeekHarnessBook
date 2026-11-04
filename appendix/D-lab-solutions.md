@@ -105,11 +105,12 @@
 **જવાબ 🧪:**
 
 ```json
-{"duplicateKeys":2,"onlyRight":1,
- "duplicates":[{"side":"left","key":["INV-1004"],"lines":[5,6]},
-               {"side":"right","key":["INV-1004"],"lines":[4,6]}],
- "onlyRight":[{"key":["INV-1005"],"line":5}]}
+{"duplicateKeys":1,
+ "onlyRight":[{"key":["INV-1005"],"line":5}],
+ "duplicates":[{"key":["INV-1004"],"left":[5,6],"right":[4,6]}]}
 ```
+
+એક જ key બંને બાજુ duplicate છે, તેથી **એક** group, જેમાં બંને બાજુની lines છે.
 
 <a id="ch4"></a>
 
@@ -186,12 +187,12 @@
 2. Input ક્રમ પર આધાર ("first-come"). Test: "two bank rows competing for one Tally row are ambiguous, not first-come". 🧪
 3. Report માં દરેક input row નો હિસાબ રહે છે ("every input row appears in exactly one result" test); ચૂપચાપ skip ખોટો "બધું મેળ ખાય છે" દેખાવ આપે. 🧪
 4. Read-only ની ખાતરી type level પર; provider ગમે તે હોય, consumer લખી જ ન શકે; review સરળ. ⚠️ (design)
-5. કોઈ fixture/test માં એ જ રકમ, ઊંધી દિશા, window ની અંદર — એવી જોડ નહોતી. 🧪
+5. કોઈ fixture/test માં એ જ રકમ, ઊંધી દિશા, window ની અંદર — એવી જોડ નહોતી. 🧪 (12 માંથી એક પણ test નહીં.)
 
 <a id="challenge"></a>
 
 ## Debugging challenge — સમજૂતી
 
-**Bug:** R2 predicate `b.amount === t.amount` ને બદલે `Math.abs(b.amount) === Math.abs(t.amount)` — money-in અને money-out સરખી રકમ હોય તો match. 🧪 Bug સાથે 10/10 tests pass; solution test `sign.test.ts` bug સાથે `actual: ['matched']` (fail), fix સાથે pass.
+**Bug:** R2 predicate `b.amount === t.amount` ને બદલે `Math.abs(b.amount) === Math.abs(t.amount)` — money-in અને money-out સરખી રકમ હોય તો match. 🧪 Bug સાથે 12/12 tests pass; solution test `sign.test.ts` bug સાથે `actual: ['matched']` (fail), fix સાથે pass.
 
 **શીખ:** tests rules પરથી લખો, ફક્ત fixtures પરથી નહીં — દરેક rule ની દરેક શરત (amount, **sign**, window, uniqueness) માટે એક negative case. Repository ની devDependencies માં `fast-check` છે; property-based test ("કોઈ match માં બંને amounts નું sign સરખું હોય") આ વર્ગની ભૂલ આપોઆપ શોધે. ⚠️ (અમે property test લખ્યો નથી.)

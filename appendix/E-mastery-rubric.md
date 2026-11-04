@@ -36,7 +36,7 @@
 - [ ] `git log -1` pinned SHA બતાવે છે.
 - [ ] `run-mock.sh` બે `llm/stream` calls અને `turn/end completed` બતાવે છે.
 - [ ] `--dump-config` માં 101 rows; `tools`, `agent-loop`, `fs-sandbox` નું મૂળ layer ખબર છે.
-- [ ] Labs: `tests 20, pass 20`; `tsc` exit 0.
+- [ ] Labs: `tests 25, pass 25` (challenge test સાથે 26); `tsc` exit 0.
 - [ ] Contribution patch: test patch વગર fail, સાથે pass.
 - [ ] Reconciliation golden report હાથથી ગણેલી totals સાથે મેળ ખાય છે.
 - [ ] Debugging challenge માટેનો test bug સાથે fail થાય છે.

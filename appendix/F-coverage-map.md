@@ -41,10 +41,10 @@ Pinned commit ના મુખ્ય subsystems અને પુસ્તકમ�
 | Lab | Upstream seam | Test status |
 |---|---|---|
 | `request-trace/trace-events.ts` | `session/event`, `agent/assistant-stream`, `llm/stream`, `tools/result` | 🧪 used in every run |
-| `csv-inspect` | `ctx.tools` + `ctx.fs` | 🧪 10/10 tests, e2e turn |
+| `csv-inspect` | `ctx.tools` + `ctx.fs` | 🧪 13/13 tests, e2e turn |
 | `measure/metrics.ts` | `llm/stream`, `tools/execute` | 🧪 5+5 runs |
 | `contribution/headless-teardown.patch` | `dsh-headless` runner | 🧪 136/136 suite, 100% coverage, lint, tsc |
-| `reconcile` | `ctx.tools` + `ctx.fs` | 🧪 10/10 tests + challenge test, e2e turn |
+| `reconcile` | `ctx.tools` + `ctx.fs` | 🧪 12/12 tests + challenge test, e2e turn |
 | `cordis-basics` | Loader, logger, tool executor | 🧪 |
 
 ઓછું આવરી લીધેલું (○) એ ઇરાદાપૂર્વક છે: પુસ્તકનો request path headless profile છે. આગળ વધવા માટે repository ના `docs/subsystems/*.md` અને `docs/cookbook/*.md` એ જ commit પર વાંચો.

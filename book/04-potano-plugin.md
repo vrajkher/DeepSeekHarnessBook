@@ -70,10 +70,10 @@ TOOL_NAME=greet TOOL_ARGS='{"name":"Ada"}' SUCCESS_TEXT=done EXTRA_PATCH=$O TASK
 Deterministic એટલે: એ જ input → byte-identical output, અને કોઈ નિર્ણય "અનુમાન" થી નહીં. નિયમો ([labs/csv-inspect/src/compare.ts](../labs/csv-inspect/src/compare.ts)):
 
 1. **Key** = key columns ની trimmed values, U+001F થી જોડેલી.
-2. એક બાજુ એક key **એકથી વધુ વાર** આવે તો તે **duplicate**: તેની એક પણ row match નહીં થાય, કારણ કે એક પસંદ કરવી એ guess છે.
+2. કોઈ પણ બાજુ એક key **એકથી વધુ વાર** આવે તો તે **duplicate**: તેની એક પણ row match નહીં થાય, કારણ કે એક પસંદ કરવી એ guess છે. Group માં **બંને બાજુની** એ key ની lines રહે છે, જેથી સામેની બાજુની એકલી row પણ report માંથી ગાયબ ન થાય.
 3. બંને બાજુ બરાબર એક વાર હોય તો **matched**; compare columns સરખા હોય તો identical, નહીં તો differences ની યાદી.
 4. બાકીની rows તેમની બાજુએ **unmatched**.
-5. ખરાબ row (field count ખોટો, quote બંધ નથી) parser **problem** તરીકે line number સાથે report કરે છે.
+5. ખરાબ row (field count ખોટો, quote બંધ નથી) parser **problem** તરીકે line number સાથે report કરે છે. Header માં ખાલી કે પુનરાવર્તિત column name હોય તો **દરેક** data row `INVALID_HEADER` તરીકે નકારાય છે — નહીં તો એક column ની value બીજીને ચૂપચાપ overwrite કરે.
 6. બધી output arrays key, પછી line પ્રમાણે sorted.
 
 **Parser** ([labs/csv-inspect/src/csv.ts](../labs/csv-inspect/src/csv.ts)) RFC 4180 નો નાનો ભાગ સંભાળે છે: comma, double-quoted fields, quote ની અંદર `""`, LF/CRLF, અને UTF-8 BOM. તે ક્યારેય row "સુધારતો" નથી.
@@ -125,7 +125,7 @@ async function readCsvFile(ctx: Context, exec: ToolExecution, path: string, maxB
 node --import tsx --test csv-inspect/test/*.test.ts
 ```
 
-🧪 `tests 10, pass 10, fail 0`. Integration test ([plugin.test.ts](../labs/csv-inspect/test/plugin.test.ts)) real `SystemPrompt`, `ToolRuntime`, `NativeToolExecutor`, `LocalFileSystem` plugins ને `await ctx.plugin(...)` થી ક્રમસર mount કરે છે — upstream testkit [`mountAgentLoopTestDependencies`][testkit-mount] ની જેમ — એટલે પ્રકરણ 2 નો race અહીં શક્ય નથી. છેલ્લો test સાબિત કરે છે કે plugin unload થતાં tool registry માંથી tool ગાયબ થાય છે.
+🧪 `tests 13, pass 13, fail 0`. Integration test ([plugin.test.ts](../labs/csv-inspect/test/plugin.test.ts)) real `SystemPrompt`, `ToolRuntime`, `NativeToolExecutor`, `LocalFileSystem` plugins ને `await ctx.plugin(...)` થી ક્રમસર mount કરે છે — upstream testkit [`mountAgentLoopTestDependencies`][testkit-mount] ની જેમ — એટલે પ્રકરણ 2 નો race અહીં શક્ય નથી. છેલ્લો test સાબિત કરે છે કે plugin unload થતાં tool registry માંથી tool ગાયબ થાય છે.
 
 **(2) Type check** (harness ની strict settings, built declarations સામે):
 
@@ -154,11 +154,11 @@ identical 1, different 1, only-left 1, only-right 1, duplicate keys 1, problems 
 DIFF INV-1002 (left L3, right L3): Amount "8250.50"≠"8250.00"
 ONLY-LEFT INV-1003 (L4)
 ONLY-RIGHT INV-1005 (L5)
-DUPLICATE left INV-1004 (lines 5, 6)
+DUPLICATE INV-1004 (left L5, L6; right L4)
 PROBLEM left L7 COLUMN_COUNT: expected 4 fields, found 3
 ```
 
-દરેક line નું મૂળ fixture માં શોધો: `export-a.csv` ની line 7 માં ત્રણ જ fields છે, lines 5–6 એક જ key ધરાવે છે, વગેરે.
+દરેક line નું મૂળ fixture માં શોધો: `export-a.csv` ની line 7 માં ત્રણ જ fields છે, lines 5–6 એક જ key ધરાવે છે, અને `export-b.csv` ની line 4 એ જ key ની એકલી row છે — તે પણ duplicate group માં દેખાય છે. Test "every input data line appears in exactly one place in the report" આ હિસાબ ચકાસે છે.
 
 **(4) ખોટી config — fail loud.** Overlay માં `maxBytes: -5`. 🧪 ([evidence/csv-badcfg.err](../evidence/csv-badcfg.err)):
 
@@ -186,7 +186,7 @@ book-csv-compare (file:///…/csv-inspect/src/plugin.ts): ValidationError: inval
 
 ## આગાહી કસોટી
 
-`export-b.csv` માં `INV-1004` ને **બે વાર** (lines 4 અને 6) કરો, `export-a.csv` જેમ છે તેમ રાખો. **ચલાવતા પહેલાં લખો:** summary ની `duplicateKeys`, `onlyRight`, અને `duplicates` array ની entries. પછી test માં assertion તરીકે લખી ચકાસો. જવાબ: [પરિશિષ્ટ D — Lab 4](../appendix/D-lab-solutions.md#lab-4).
+`export-b.csv` માં `INV-1004` ને **બે વાર** (lines 4 અને 6) કરો, `export-a.csv` જેમ છે તેમ રાખો. **ચલાવતા પહેલાં લખો:** summary ની `duplicateKeys`, `onlyRight`, અને `duplicates` array ની entries (દરેક entry: `key`, `left`, `right`). પછી test માં assertion તરીકે લખી ચકાસો. જવાબ: [પરિશિષ્ટ D — Lab 4](../appendix/D-lab-solutions.md#lab-4).
 
 ## નિષ્ફળતા: "tool ચાલે છે, પણ path ખોટી જગ્યાએથી વાંચે છે"
 

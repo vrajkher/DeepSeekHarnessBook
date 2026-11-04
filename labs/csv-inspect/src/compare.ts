@@ -3,8 +3,9 @@
  *
  * Deterministic comparison of two CSV exports by key columns. Rules:
  *  1. A key is the trimmed values of the key columns joined with U+001F.
- *  2. A key that appears more than once on one side is a DUPLICATE: none of
- *     its rows is matched, because choosing one would be a guess.
+ *  2. A key that appears more than once on either side is a DUPLICATE: none of
+ *     its rows is matched, because choosing one would be a guess. The group
+ *     lists the key's lines on BOTH sides, so every input row stays traceable.
  *  3. A key present exactly once on both sides is MATCHED; the compare
  *     columns decide whether the pair is identical or lists differences.
  *  4. Every other row is unmatched on its side.
@@ -32,7 +33,7 @@ export interface MatchedPair {
 
 export interface UnmatchedRow { key: string[]; line: number }
 
-export interface DuplicateKey { side: 'left' | 'right'; key: string[]; lines: number[] }
+export interface DuplicateKey { key: string[]; left: number[]; right: number[] }
 
 export interface SideProblem extends CsvProblem { side: 'left' | 'right' }
 
@@ -115,13 +116,15 @@ export function compareTables(left: CsvTable, right: CsvTable, options: CompareO
   const rightIndex = index(right.rows, keyColumns)
   const duplicates: DuplicateKey[] = []
   const duplicateKeys = new Set<string>()
-  for (const [side, map] of [['left', leftIndex], ['right', rightIndex]] as const) {
-    for (const [k, rows] of map) {
-      if (rows.length > 1) {
-        duplicates.push({ side, key: k.split(SEP), lines: rows.map(r => r.line) })
-        duplicateKeys.add(k)
-      }
-    }
+  for (const map of [leftIndex, rightIndex]) {
+    for (const [k, rows] of map) if (rows.length > 1) duplicateKeys.add(k)
+  }
+  for (const k of duplicateKeys) {
+    duplicates.push({
+      key: k.split(SEP),
+      left: (leftIndex.get(k) ?? []).map(r => r.line),
+      right: (rightIndex.get(k) ?? []).map(r => r.line),
+    })
   }
 
   const matched: MatchedPair[] = []
@@ -146,7 +149,7 @@ export function compareTables(left: CsvTable, right: CsvTable, options: CompareO
   matched.sort(byKeyThenLine(m => m.leftLine))
   onlyLeft.sort(byKeyThenLine(u => u.line))
   onlyRight.sort(byKeyThenLine(u => u.line))
-  duplicates.sort((a, b) => a.side === b.side ? byKeyThenLine<DuplicateKey>(d => d.lines[0]!)(a, b) : a.side < b.side ? -1 : 1)
+  duplicates.sort(byKeyThenLine<DuplicateKey>(d => d.left[0] ?? d.right[0]!))
   const problems: SideProblem[] = [
     ...left.problems.map(p => ({ ...p, side: 'left' as const })),
     ...right.problems.map(p => ({ ...p, side: 'right' as const })),
@@ -190,7 +193,7 @@ export function renderReport(report: CompareReport): string {
   }
   for (const u of report.onlyLeft) lines.push(`ONLY-LEFT ${u.key.join('/')} (L${u.line})`)
   for (const u of report.onlyRight) lines.push(`ONLY-RIGHT ${u.key.join('/')} (L${u.line})`)
-  for (const d of report.duplicates) lines.push(`DUPLICATE ${d.side} ${d.key.join('/')} (lines ${d.lines.join(', ')})`)
+  for (const d of report.duplicates) lines.push(`DUPLICATE ${d.key.join('/')} (left ${d.left.length ? 'L' + d.left.join(', L') : '-'}; right ${d.right.length ? 'L' + d.right.join(', L') : '-'})`)
   for (const p of report.problems) lines.push(`PROBLEM ${p.side} L${p.line} ${p.code}: ${p.message}`)
   return lines.join('\n')
 }
