@@ -1,0 +1,69 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "incremental": false,
+    "declaration": false,
+    "declarationMap": false,
+    "rootDir": "../..",
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "csv-inspect/**/*.ts",
+    "reconcile/**/*.ts",
+    "request-trace/*.ts",
+    "measure/*.ts",
+    "greet/*.ts",
+    "cordis-basics/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../../vendor/cordis"
+    },
+    {
+      "path": "../../vendor/schemastery"
+    },
+    {
+      "path": "../../packages/util/brand"
+    },
+    {
+      "path": "../../packages/session/working-directory"
+    },
+    {
+      "path": "../../packages/fs/fs"
+    },
+    {
+      "path": "../../packages/fs/fs-local"
+    },
+    {
+      "path": "../../packages/core/tools"
+    },
+    {
+      "path": "../../packages/core/system-prompt"
+    },
+    {
+      "path": "../../packages/core/tool-executor-native"
+    },
+    {
+      "path": "../../packages/llm/llm"
+    },
+    {
+      "path": "../../packages/core/session"
+    },
+    {
+      "path": "../../packages/core/agent"
+    },
+    {
+      "path": "../../packages/test-support/llm-mock-server"
+    },
+    {
+      "path": "../../vendor/loader"
+    },
+    {
+      "path": "../../vendor/logger-console"
+    }
+  ]
+}

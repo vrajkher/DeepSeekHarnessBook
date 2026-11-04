@@ -1,0 +1,153 @@
+[
+  {
+    "attempt": 1,
+    "behavior": "tool_call_success",
+    "path": "/v1/messages",
+    "headers": {
+      "content-type": "application/json",
+      "anthropic-version": "2023-06-01",
+      "x-deepseek-harness-user-id": "<redacted anonymous id>",
+      "x-deepseek-harness-session-id": "session-88908480-9ef3-47fd-994c-56ee8ef1836a"
+    },
+    "bodyKeys": [
+      "dsh_plugin_packages",
+      "dsh_session_log",
+      "max_tokens",
+      "messages",
+      "model",
+      "output_config",
+      "stream",
+      "system",
+      "thinking",
+      "tools"
+    ],
+    "model": "deepseek-flash",
+    "stream": true,
+    "messageRoles": [
+      "user"
+    ],
+    "lastMessage": {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "આ repositoryનું README વાંચીને ગુજરાતી સાર આપો."
+        },
+        {
+          "type": "text",
+          "text": "<system-reminder>\nThe following workspace instructions may be relevant to your work. Use them as guidance when applicable. More specific instructions take precedence over broader ones. They do not override system, developer, or direct user instructions.\n\nInstructions from: AGENTS.md\n\n# AGENTS.md\n\nDe…[truncated by book]"
+        },
+        {
+          "type": "text",
+          "text": "Current runtime context. This snapshot supersedes earlier runtime-context snapshots.\n\nCurrent working directory: \"<harness>\".\n\nCurrent DSH file policy: workspace-write. Any available operation enf…[truncated by book]"
+        },
+        {
+          "type": "text",
+          "text": "<system-reminder>\nA skill is a reusable set of task-specific instructions. The following skills are available in this session:\n\n<available_skills>\n- `agent-experience`: Use when writing or changing a model-facing tool definition (name, description, parameter schema, or its system-prompt section), an…[truncated by book]"
+        }
+      ]
+    },
+    "toolNames": [
+      "bash",
+      "create_goal",
+      "edit",
+      "get_goal",
+      "glob",
+      "grep",
+      "interrupt_agent",
+      "job_kill",
+      "job_list",
+      "job_output",
+      "list_agents",
+      "read",
+      "read_image",
+      "send_message",
+      "skill",
+      "subagent",
+      "subagent_fork",
+      "todo_write",
+      "update_goal",
+      "wait_agent",
+      "web_fetch",
+      "web_search",
+      "workflow",
+      "working_directory",
+      "write"
+    ],
+    "hasSessionLogField": true
+  },
+  {
+    "attempt": 2,
+    "behavior": "success",
+    "path": "/v1/messages",
+    "headers": {
+      "content-type": "application/json",
+      "anthropic-version": "2023-06-01",
+      "x-deepseek-harness-user-id": "<redacted anonymous id>",
+      "x-deepseek-harness-session-id": "session-88908480-9ef3-47fd-994c-56ee8ef1836a"
+    },
+    "bodyKeys": [
+      "dsh_plugin_packages",
+      "dsh_session_log",
+      "max_tokens",
+      "messages",
+      "model",
+      "output_config",
+      "stream",
+      "system",
+      "thinking",
+      "tools"
+    ],
+    "model": "deepseek-flash",
+    "stream": true,
+    "messageRoles": [
+      "user",
+      "assistant",
+      "user"
+    ],
+    "lastMessage": {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "mock-call-1",
+          "content": [
+            {
+              "type": "text",
+              "text": "<path><harness>/README.md</path>\n<type>file</type>\n<content>\n1: # DeepSeek Harness\n2: \n3: English | [中文](README.zh.md)\n4: \n5: DeepSeek Harness (`dsh`) is an open-source agent harness developed by …[truncated by book]"
+            }
+          ],
+          "is_error": false
+        }
+      ]
+    },
+    "toolNames": [
+      "bash",
+      "create_goal",
+      "edit",
+      "get_goal",
+      "glob",
+      "grep",
+      "interrupt_agent",
+      "job_kill",
+      "job_list",
+      "job_output",
+      "list_agents",
+      "read",
+      "read_image",
+      "send_message",
+      "skill",
+      "subagent",
+      "subagent_fork",
+      "todo_write",
+      "update_goal",
+      "wait_agent",
+      "web_fetch",
+      "web_search",
+      "workflow",
+      "working_directory",
+      "write"
+    ],
+    "hasSessionLogField": true
+  }
+]

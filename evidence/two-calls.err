@@ -1,0 +1,34 @@
+[trace +  125ms] session/event #0 permission/preset
+[trace +  126ms] session/event #1 sandbox/mode
+[trace +  127ms] session/event #2 approval/policy
+[trace +  129ms] session/event #3 agent/inbox/spliced
+[trace +  132ms] session/event #4 turn/start {"turn":1}
+[trace +  133ms] session/event #5 agent/inbox/spliced
+[trace +  239ms] session/event #6 step/start {"turn":1,"step":1}
+[trace +  243ms] session/event #7 system/message
+[trace +  244ms] session/event #8 user/message
+[trace +  245ms] session/event #9 user/message
+[trace +  246ms] session/event #10 user/message
+[trace +  246ms] session/event #11 user/message
+[trace +  248ms] session/event #12 request/header
+[trace +  249ms] session/event #13 request/context
+[trace +  250ms] llm/stream call #1 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  250ms] live  stream start turn=1 step=1
+[trace +  252ms] session/event #14 session/title
+[trace +  296ms] session/event #15 session-log-deepseek/delivery-accepted
+[trace +  306ms] session/event #16 assistant/message
+[trace +  307ms] live  stream end chunks=7 -> assistant/message #16
+[trace +  308ms] session/event #17 tool/call name=read arguments={"file_path":"README.md"}
+[trace +  319ms] tools/result read isError=false chars=3175
+[trace +  321ms] session/event #18 tool/result
+[trace +  321ms] session/event #19 step/end {"turn":1,"step":1}
+[trace +  340ms] session/event #20 step/start {"turn":1,"step":2}
+[trace +  342ms] llm/stream call #2 deepseek-official/deepseek-flash messages=7 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  343ms] live  stream start turn=1 step=2
+[trace +  354ms] session/event #21 session-log-deepseek/delivery-accepted
+[trace +  359ms] session/event #22 assistant/message
+[trace +  359ms] live  stream end chunks=13 -> assistant/message #22
+[trace +  359ms] session/event #23 step/end {"turn":1,"step":2}
+[trace +  360ms] session/event #24 turn/end reason={"kind":"completed"}
+[trace +  402ms] dispose: total llm/stream calls = 2
+dsh exit: 0

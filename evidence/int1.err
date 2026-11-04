@@ -1,0 +1,23 @@
+[trace +  148ms] session/event #0 permission/preset
+[trace +  149ms] session/event #1 sandbox/mode
+[trace +  150ms] session/event #2 approval/policy
+[trace +  152ms] session/event #3 agent/inbox/spliced
+[trace +  153ms] session/event #4 turn/start {"turn":1}
+[trace +  154ms] session/event #5 agent/inbox/spliced
+[trace +  300ms] session/event #6 step/start {"turn":1,"step":1}
+[trace +  305ms] session/event #7 system/message
+[trace +  306ms] session/event #8 user/message
+[trace +  307ms] session/event #9 user/message
+[trace +  308ms] session/event #10 user/message
+[trace +  308ms] session/event #11 user/message
+[trace +  311ms] session/event #12 request/header
+[trace +  311ms] session/event #13 request/context
+[trace +  312ms] llm/stream call #1 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  313ms] live  stream start turn=1 step=1
+[trace +  315ms] session/event #14 session/title
+[trace +  373ms] session/event #15 session-log-deepseek/delivery-accepted
+[trace + 1799ms] session/event #16 assistant/attempt
+[trace + 1799ms] live  stream end chunks=0 -> assistant/attempt #16
+[trace + 1799ms] session/event #17 step/end {"turn":1,"step":1}
+[trace + 1800ms] session/event #18 turn/end reason={"kind":"aborted","reason":{"kind":"disposed"}}
+[trace + 1836ms] dispose: total llm/stream calls = 1

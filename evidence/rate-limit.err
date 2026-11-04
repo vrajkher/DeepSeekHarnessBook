@@ -1,0 +1,40 @@
+[trace +  135ms] session/event #0 permission/preset
+[trace +  137ms] session/event #1 sandbox/mode
+[trace +  137ms] session/event #2 approval/policy
+[trace +  139ms] session/event #3 agent/inbox/spliced
+[trace +  141ms] session/event #4 turn/start {"turn":1}
+[trace +  142ms] session/event #5 agent/inbox/spliced
+[trace +  252ms] session/event #6 step/start {"turn":1,"step":1}
+[trace +  256ms] session/event #7 system/message
+[trace +  257ms] session/event #8 user/message
+[trace +  257ms] session/event #9 user/message
+[trace +  258ms] session/event #10 user/message
+[trace +  258ms] session/event #11 user/message
+[trace +  260ms] session/event #12 request/header
+[trace +  261ms] session/event #13 request/context
+[trace +  262ms] llm/stream call #1 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  262ms] live  stream start turn=1 step=1
+[trace +  264ms] session/event #14 session/title
+[trace +  312ms] session/event #15 assistant/attempt
+[trace +  312ms] live  stream end chunks=1 -> assistant/attempt #15
+[trace +  313ms] session/event #16 llm/retry
+[trace + 1314ms] session/event #17 llm/retry-started
+[trace + 1317ms] llm/stream call #2 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace + 1317ms] live  stream start turn=1 step=1
+[trace + 1328ms] session/event #18 session-log-deepseek/delivery-accepted
+[trace + 1338ms] session/event #19 assistant/message
+[trace + 1338ms] live  stream end chunks=7 -> assistant/message #19
+[trace + 1340ms] session/event #20 tool/call name=read arguments={"file_path":"README.md"}
+[trace + 1351ms] tools/result read isError=false chars=3175
+[trace + 1352ms] session/event #21 tool/result
+[trace + 1353ms] session/event #22 step/end {"turn":1,"step":1}
+[trace + 1372ms] session/event #23 step/start {"turn":1,"step":2}
+[trace + 1374ms] llm/stream call #3 deepseek-official/deepseek-flash messages=7 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace + 1374ms] live  stream start turn=1 step=2
+[trace + 1385ms] session/event #24 session-log-deepseek/delivery-accepted
+[trace + 1389ms] session/event #25 assistant/message
+[trace + 1390ms] live  stream end chunks=13 -> assistant/message #25
+[trace + 1390ms] session/event #26 step/end {"turn":1,"step":2}
+[trace + 1391ms] session/event #27 turn/end reason={"kind":"completed"}
+[trace + 1450ms] dispose: total llm/stream calls = 3
+dsh exit: 0

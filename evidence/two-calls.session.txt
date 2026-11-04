@@ -1,0 +1,26 @@
+#undefined session 
+#0 permission/preset {"preset":"workspace-write"}
+#1 sandbox/mode {"mode":"workspace-write"}
+#2 approval/policy {"policy":"ask"}
+#3 agent/inbox/spliced {"target":"next-turn","start":0,"inserted":[{"content":[{"type":"text","text":"આ repositoryનું README વાંચીને ગુજરાતી સાર આપો."}],"source":{…
+#4 turn/start {"turn":1}
+#5 agent/inbox/spliced {"target":"next-turn","start":0,"removedCount":1,"inserted":[]}
+#6 step/start {"turn":1,"step":1}
+#7 system/message {"turn":1,"step":1,"message":{"role":"system","content":[{"type":"text","text":"You are an AI agent powered by DeepSeek Harness.\n\nYou are …
+#8 user/message source={"kind":"user"} content=[{"type":"text","text":"આ repositoryનું README વાંચીને ગુજરાતી સાર આપો."}]
+#9 user/message source={"kind":"agent-instructions","form":"instructions","baseline… content=[{"type":"text","text":"<system-reminder>\nThe following workspace instructions may be relevant to your work. Use them as guidance when appl…
+#10 user/message source={"kind":"runtime-context","form":"snapshot","sections":[{"na… content=[{"type":"text","text":"Current runtime context. This snapshot supersedes earlier runtime-context snapshots.\n\nCurrent working directory: \…
+#11 user/message source={"kind":"skill-catalog","form":"catalog","entries":[{"name":… content=[{"type":"text","text":"<system-reminder>\nA skill is a reusable set of task-specific instructions. The following skills are available in th…
+#12 request/header reason=initial model=deepseek-official/deepseek-flash tools=25
+#13 request/context {"provider":"deepseek-official","model":"deepseek-flash","contextWindow":1048576,"systemPromptUpdate":"in-history"}
+#14 session/title {"title":"આ repositoryનું README વાં","messageSeqs":[8],"source":{"kind":"fallback"}}
+#15 session-log-deepseek/delivery-accepted {"sessionId":"session-fecb32c4-7cfd-4beb-adde-047e0bf5161a","sessionFormatVersion":4,"throughSeq":14}
+#16 assistant/message content=[{"type":"tool-call","id":"mock-call-1","name":"read","arguments":"{\"file_path\":\"README.md\"}"}] streamChunks=6
+#17 tool/call read {"file_path":"README.md"}
+#18 tool/result isError=false code=- content=[{"type":"text","text":"<path><harness>/…
+#19 step/end {"turn":1,"step":1}
+#20 step/start {"turn":1,"step":2}
+#21 session-log-deepseek/delivery-accepted {"sessionId":"session-fecb32c4-7cfd-4beb-adde-047e0bf5161a","sessionFormatVersion":4,"throughSeq":20}
+#22 assistant/message content=[{"type":"text","text":"README નો સાર: DeepSeek Harness એ plugin આધારિત agent harness છે."}] streamChunks=5
+#23 step/end {"turn":1,"step":2}
+#24 turn/end {"turn":1,"reason":{"kind":"completed"}}

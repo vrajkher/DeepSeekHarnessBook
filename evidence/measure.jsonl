@@ -1,0 +1,10 @@
+{"modelCalls": 2, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 8.32, "isError": false}], "title": "off"}
+{"modelCalls": 2, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 10.11, "isError": false}], "title": "off"}
+{"modelCalls": 2, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 11.39, "isError": false}], "title": "off"}
+{"modelCalls": 2, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 9.34, "isError": false}], "title": "off"}
+{"modelCalls": 2, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 9.23, "isError": false}], "title": "off"}
+{"modelCalls": 3, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "session-title", "messages": 1}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 16.35, "isError": false}], "title": "on"}
+{"modelCalls": 3, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "session-title", "messages": 1}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 14.12, "isError": false}], "title": "on"}
+{"modelCalls": 3, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "session-title", "messages": 1}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 15.55, "isError": false}], "title": "on"}
+{"modelCalls": 3, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "session-title", "messages": 1}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 14.89, "isError": false}], "title": "on"}
+{"modelCalls": 3, "calls": [{"purpose": "agent", "messages": 5}, {"purpose": "session-title", "messages": 1}, {"purpose": "agent", "messages": 7}], "toolCalls": 1, "tools": [{"name": "read", "ms": 16.41, "isError": false}], "title": "on"}
