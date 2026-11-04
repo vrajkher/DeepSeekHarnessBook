@@ -3,7 +3,8 @@
 # Run from the harness checkout root after `pnpm install && pnpm run build`.
 #   bash tmp/book-labs/request-trace/run-mock.sh
 # Environment knobs: SEQUENCE, TOOL_NAME, TOOL_ARGS, SUCCESS_TEXT, TASK, TITLE=on|off,
-# PORT, MOCK_EXTRA (extra mock flags), EXTRA_PATCH (absolute path of one more overlay).
+# PORT, MOCK_EXTRA (extra mock flags), EXTRA_PATCH (absolute path of one more overlay),
+# DSH_ARGS (extra headless flags, e.g. "--session-id session-…"). DSH_HOME persists between runs; delete it for a fresh start.
 set -euo pipefail
 LAB="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$LAB/../../.." && pwd)"
@@ -38,7 +39,7 @@ for _ in $(seq 1 50); do grep -q '"ready"' "$LAB/mock.jsonl" 2>/dev/null && brea
 
 cd "$ROOT"
 DEEPSEEK_BASE_URL="http://127.0.0.1:$PORT/v1" DEEPSEEK_API_KEY=mock-key DSH_TELEMETRY_DISABLED=1 \
-  pnpm --silent dsh --profile headless --patch "$LAB/overlay.generated.yml" ${EXTRA_PATCH:+--patch "$EXTRA_PATCH"} \
+  pnpm --silent dsh --profile headless --patch "$LAB/overlay.generated.yml" ${EXTRA_PATCH:+--patch "$EXTRA_PATCH"} ${DSH_ARGS:-} \
   "${TASK:-આ repositoryનું README વાંચીને ગુજરાતી સાર આપો.}" && status=0 || status=$?
 echo "dsh exit: $status" >&2
 exit "$status"

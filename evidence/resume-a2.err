@@ -1,0 +1,15 @@
+[trace +  160ms] session/event #26 agent/inbox/spliced
+[trace +  162ms] session/event #27 turn/start {"turn":2}
+[trace +  163ms] session/event #28 agent/inbox/spliced
+[trace +  256ms] session/event #29 step/start {"turn":2,"step":1}
+[trace +  260ms] session/event #30 user/message
+[trace +  263ms] session/event #31 request/header
+[trace +  265ms] llm/stream call #1 deepseek-official/deepseek-flash messages=9 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  265ms] live  stream start turn=2 step=1
+[trace +  306ms] session/event #32 session-log-deepseek/delivery-accepted
+[trace +  317ms] session/event #33 assistant/message
+[trace +  317ms] live  stream end chunks=10 -> assistant/message #33
+[trace +  318ms] session/event #34 step/end {"turn":2,"step":1}
+[trace +  318ms] session/event #35 turn/end reason={"kind":"completed"}
+[trace +  368ms] dispose: total llm/stream calls = 1
+dsh exit: 0
