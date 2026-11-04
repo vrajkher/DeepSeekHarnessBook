@@ -1,0 +1,151 @@
+<title>DeepSeek Harness: કોલેજથી Expert Developer સુધી</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Gujarati:wght@500;650;750&family=Noto+Sans+Gujarati:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a technical book read like a lab notebook — a sticky table of contents on the
+   left with the pinned commit as its spine, one long readable column of chapters on the right. */
+:root {
+  --paper: #f4f6f9;
+  --sheet: #ffffff;
+  --ink: #1b2030;
+  --muted: #586078;
+  --rule: #d9dee8;
+  --accent: #2c43b0;
+  --accent-soft: #e6eaf8;
+  --code-bg: #eef1f6;
+  --font-display: "Anek Gujarati", "Noto Sans Gujarati", system-ui, sans-serif;
+  --font-body: "Noto Sans Gujarati", "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --step--1: 0.84rem; --step-0: 1rem; --step-1: 1.2rem; --step-2: 1.5rem; --step-3: 2.05rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11141c; --sheet: #171b25; --ink: #e3e7f0; --muted: #9aa3b8; --rule: #2a3142;
+    --accent: #93a6ff; --accent-soft: #1f2542; --code-bg: #1b2030; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #11141c; --sheet: #171b25; --ink: #e3e7f0; --muted: #9aa3b8; --rule: #2a3142;
+  --accent: #93a6ff; --accent-soft: #1f2542; --code-bg: #1b2030; color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 16.5px; line-height: 1.75;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.shell { display: grid; grid-template-columns: 17.5rem minmax(0, 1fr); gap: 2.5rem; max-width: 76rem; margin: 0 auto; padding-block: 1.5rem 4rem; }
+
+/* Sidebar */
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1rem); align-self: start; max-height: calc(100vh - 2rem); overflow-y: auto; padding-right: 0.5rem; font-size: var(--step--1); line-height: 1.45; }
+.brand { font-family: var(--font-display); font-weight: 750; font-size: 1.15rem; line-height: 1.25; margin: 0 0 0.75rem; text-wrap: balance; }
+.pin { display: inline-flex; gap: 0.4rem; align-items: center; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); border: 1px solid var(--rule); border-radius: 4px; padding: 0.15rem 0.45rem; margin-bottom: 0.9rem; }
+.pin b { color: var(--accent); font-weight: 500; }
+.legend { display: grid; gap: 0.2rem; color: var(--muted); margin: 0 0 1.1rem; padding: 0.6rem 0.7rem; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; }
+.nav-group { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin: 1rem 0 0.35rem; }
+.nav-list, .sub { list-style: none; margin: 0; padding: 0; }
+.nav-list > li > a { display: grid; gap: 0.05rem; padding: 0.35rem 0.6rem; border-left: 2px solid transparent; color: var(--ink); text-decoration: none; }
+.nav-list > li > a:hover { background: var(--accent-soft); }
+.nav-list > li > a.active { border-left-color: var(--accent); background: var(--accent-soft); }
+.nav-eyebrow { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+.nav-title { font-weight: 600; }
+.sub { display: none; padding: 0.15rem 0 0.4rem 0.9rem; }
+.nav-list > li > a.active + .sub { display: block; }
+.sub a { display: block; padding: 0.15rem 0.4rem; color: var(--muted); text-decoration: none; }
+.sub a:hover { color: var(--accent); }
+.toc-toggle { display: none; }
+
+/* Content */
+main { min-width: 0; }
+.part { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: clamp(1.25rem, 3vw, 2.75rem); margin-bottom: 2rem; scroll-margin-top: 1rem; }
+.part > * { max-width: 46rem; }
+.part > .table-wrap, .part > .code, .part > pre.mermaid { max-width: 100%; }
+h2, h3, h4, h5 { font-family: var(--font-display); line-height: 1.3; text-wrap: balance; scroll-margin-top: 1rem; }
+.chapter-title { font-size: var(--step-3); font-weight: 750; margin: 0 0 1.25rem; display: grid; gap: 0.3rem; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+h3 { font-size: var(--step-2); font-weight: 650; margin: 2.4rem 0 0.8rem; padding-top: 1.4rem; border-top: 1px solid var(--rule); }
+h4 { font-size: var(--step-1); font-weight: 650; margin: 1.8rem 0 0.6rem; }
+h5 { font-size: var(--step-0); font-weight: 650; margin: 1.4rem 0 0.5rem; }
+p, ul, ol { margin: 0 0 1rem; }
+li { margin-bottom: 0.3rem; }
+a { color: var(--accent); text-underline-offset: 0.18em; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+a:focus-visible, .toc-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+strong { font-weight: 600; }
+blockquote { margin: 1.25rem 0; padding: 0.75rem 1rem; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; }
+blockquote p:last-child { margin-bottom: 0; }
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg); padding: 0.08em 0.32em; border-radius: 3px; overflow-wrap: anywhere; }
+.code { overflow-x: auto; background: var(--code-bg); border: 1px solid var(--rule); border-radius: 6px; margin: 0 0 1.1rem; }
+.code pre { margin: 0; padding: 0.85rem 1rem; font-size: 0.84rem; line-height: 1.55; }
+.code code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; white-space: pre; }
+.table-wrap { overflow-x: auto; margin: 0 0 1.25rem; border: 1px solid var(--rule); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; line-height: 1.5; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--rule); }
+th { background: var(--code-bg); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+pre.mermaid { overflow-x: auto; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 1rem; margin: 0 0 1.25rem; text-align: center; }
+input[type="checkbox"] { accent-color: var(--accent); }
+.anchor { display: block; position: relative; top: -1rem; }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding-block: 0.75rem 3rem; }
+  .toc { position: static; max-height: none; overflow: visible; padding: 0; }
+  .toc-toggle { display: block; width: 100%; font: inherit; font-weight: 600; text-align: left; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 0.6rem 0.8rem; cursor: pointer; }
+  .toc-body { margin-top: 0.75rem; }
+  .toc-body[hidden] { display: none !important; }
+  .part { padding: 1.1rem; }
+  body { font-size: 16px; }
+}
+</style>
+
+<div class="shell">
+  <aside class="toc" aria-label="વિષયસૂચિ">
+    <p class="brand">DeepSeek Harness: કોલેજથી Expert Developer સુધી</p>
+    <span class="pin">pinned <b>fcc0ad4</b> · 0.2.2-rc.1</span>
+    <button class="toc-toggle" id="toc-toggle" type="button" aria-expanded="false" aria-controls="toc-body">વિષયસૂચિ ખોલો</button>
+    <div class="toc-body" id="toc-body">
+      <div class="legend">
+        <span>✅ source વાંચીને ચકાસ્યું</span>
+        <span>🧪 ચલાવીને ચકાસ્યું</span>
+        <span>⚠️ ચકાસ્યું નથી</span>
+      </div>
+      <nav><!--NAV--></nav>
+    </div>
+  </aside>
+  <main>
+<!--BODY-->
+  </main>
+</div>
+
+<script>
+(() => {
+  const toggle = document.getElementById('toc-toggle')
+  const body = document.getElementById('toc-body')
+  const narrow = window.matchMedia('(max-width: 860px)')
+  const setOpen = open => {
+    body.hidden = narrow.matches && !open
+    toggle.setAttribute('aria-expanded', String(open))
+    toggle.textContent = open ? 'વિષયસૂચિ બંધ કરો' : 'વિષયસૂચિ ખોલો'
+  }
+  setOpen(false)
+  toggle.addEventListener('click', () => setOpen(body.hidden))
+  narrow.addEventListener('change', () => setOpen(false))
+  body.addEventListener('click', e => { if (narrow.matches && e.target.closest('a')) setOpen(false) })
+
+  const links = new Map([...document.querySelectorAll('.nav-list > li > a[data-view]')].map(a => [a.dataset.view, a]))
+  const setActive = id => {
+    for (const [view, a] of links) a.classList.toggle('active', view === id)
+  }
+  const observer = new IntersectionObserver(entries => {
+    const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+    if (visible[0]) setActive(visible[0].target.id)
+  }, { rootMargin: '0px 0px -70% 0px' })
+  document.querySelectorAll('section.part').forEach(s => observer.observe(s))
+  setActive('top')
+})()
+</script>

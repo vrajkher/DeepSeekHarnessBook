@@ -205,3 +205,9 @@ python3 tools/refdefs.py book/*.md appendix/*.md
 ```bash
 python3 tools/verify_book.py <pinned harness checkout>
 ```
+
+Single-page HTML build of the whole book (uses the harness's own `marked` package):
+
+```bash
+node tools/build-artifact.mjs <harness>/node_modules/.pnpm/marked@16.4.2/node_modules/marked/lib/marked.esm.js book.html
+```
