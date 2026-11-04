@@ -1,0 +1,3 @@
+{"type":"ready","baseURL":"http://127.0.0.1:8002/v1","randomSeed":3706444455}
+{"type":"request","attempt":1,"scriptBehavior":"stall","behavior":"stall","path":"/v1/messages"}
+{"type":"result","attempt":1,"scriptBehavior":"stall","behavior":"stall","outcome":"stalled","chunksSent":0}

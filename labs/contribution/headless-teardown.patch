@@ -1,0 +1,70 @@
+diff --git a/packages/bundle/headless/src/index.ts b/packages/bundle/headless/src/index.ts
+index bc98d7ae6b..dd34b3cf99 100644
+--- a/packages/bundle/headless/src/index.ts
++++ b/packages/bundle/headless/src/index.ts
+@@ -11,7 +11,7 @@
+  */
+ 
+ import { randomUUID } from 'node:crypto'
+-import type { Context } from '@deepseek-ai/cordis'
++import { FiberState, type Context } from '@deepseek-ai/cordis'
+ import z from '@deepseek-ai/schemastery'
+ import { brandString } from '@deepseek-ai/dsh-brand'
+ import type { Agent, AgentOptions } from '@deepseek-ai/dsh-agent'
+@@ -432,6 +432,9 @@ async function run(ctx: Context, config: Config, io: HeadlessIo): Promise<void>
+     } finally {
+       stopReasoning?.()
+     }
++    // Teardown (for example SIGINT) disposed this runner while the Agent settled;
++    // the launcher owns that exit status, and closed Session handles cannot flush.
++    if (ctx.fiber.state !== FiberState.ACTIVE) return
+     await sessions.flush(agent.session)
+     if (failure !== undefined) throw failure.error
+     const outcome = summarize(agent.session, firstSeq)
+diff --git a/packages/bundle/headless/tests/teardown-flush.spec.ts b/packages/bundle/headless/tests/teardown-flush.spec.ts
+new file mode 100644
+index 0000000000..2fb11f43de
+--- /dev/null
++++ b/packages/bundle/headless/tests/teardown-flush.spec.ts
+@@ -0,0 +1,41 @@
++/** Headless reporting when application teardown interrupts a running task. */
++
++import { afterEach, describe, expect, it } from 'vitest'
++import { Context } from '@deepseek-ai/cordis'
++import AgentDefaultModelConfig from '@deepseek-ai/dsh-agent-default-model'
++import AgentLoop from '@deepseek-ai/dsh-agent-loop'
++import { mountAgentLoopTestDependencies } from '@deepseek-ai/dsh-agent-loop-testkit'
++import { MockAdapter } from '../../../core/agent-loop/tests/mock-adapter.ts'
++import { apply } from '../src/index.ts'
++import { internals } from '../src/runner-internals.ts'
++
++const originalInternals = { ...internals }
++
++afterEach(() => {
++  Object.assign(internals, originalInternals)
++})
++
++describe('headless teardown', () => {
++  it('leaves reporting and exit status to the launcher when the tree is disposed mid-turn', async () => {
++    const ctx = new Context()
++    await mountAgentLoopTestDependencies(ctx)
++    await ctx.plugin(AgentLoop, { agents: [] })
++    await ctx.plugin(AgentDefaultModelConfig, { provider: 'mock', model: 'mock' })
++    ctx.llm.registerAdapter(['mock'], new MockAdapter(['hang']))
++    let err = ''
++    internals.stdout = { write: () => true }
++    internals.stderr = { write: (chunk: string) => { err += chunk; return true } }
++    const exits: number[] = []
++    ctx.provide('appExit', (code: number) => { exits.push(code) })
++    const streaming = Promise.withResolvers<void>()
++    ctx.on('agent/assistant-stream', ({ frame }) => { if (frame.type === 'chunk') streaming.resolve() })
++
++    apply(ctx, { task: 'stall' })
++    await streaming.promise
++    await ctx.fiber.dispose()
++    await new Promise(resolve => setTimeout(resolve, 20))
++
++    expect(err).toBe('')
++    expect(exits).toEqual([])
++  })
++})

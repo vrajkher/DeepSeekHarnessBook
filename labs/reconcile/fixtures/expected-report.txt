@@ -1,0 +1,15 @@
+bank rows 10, tally rows 8, window ±3 day(s)
+matched 3 (₹11049.50), ambiguous 1, unmatched bank 1, unmatched tally 2, duplicates 1, rejected 4
+unexplained difference (unmatched bank - unmatched tally): -₹3659.00
+MATCHED [R1] bank L2 ↔ tally L2 ₹15000.00: reference N0914000123 and amount ₹15000.00 agree
+MATCHED [R1] bank L3 ↔ tally L3 -₹8250.50: reference 4512 and amount -₹8250.50 agree
+MATCHED [R2] bank L4 ↔ tally L4 ₹4300.00: amount ₹4300.00 agrees; dates 1 day(s) apart (window 3)
+AMBIGUOUS [A1] bank L5 ↔ tally L5,L6 ₹12000.00: amount ₹12000.00 within 3 day(s) fits 1 bank and 2 Tally rows
+UNMATCHED [U1] bank L6 -₹59.00: no tally row with this reference or amount within 3 day(s)
+UNMATCHED [U1] tally L7 ₹6100.00: reference N0970000456 also appears in held bank duplicates (lines 7, 8)
+UNMATCHED [U1] tally L8 -₹2500.00: no bank row with this reference or amount within 3 day(s)
+DUPLICATE [D1] bank L7,L8 ₹6100.00: 2 identical bank rows (date 2026-04-07, ₹6100.00); held for review
+REJECTED [V1] bank L9: invalid date "31-02-2026"
+REJECTED [V1] tally L9: invalid debit "12,00x.00"
+REJECTED [V1] bank L10: both debit and credit are filled
+REJECTED [V1] bank L11: COLUMN_COUNT: expected 7 fields, found 3

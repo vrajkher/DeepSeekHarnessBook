@@ -1,0 +1,36 @@
+dsh: no agent factory registered (load an agent-loop plugin)
+dsh: startup failed: 2 required plugins did not activate
+
+Plugins waiting for services (29):
+  Plugin                           Missing services
+  tool-executor-native (required)  tools
+  agent-loop (required)            tools, systemPrompt
+  working-directory                systemPrompt
+  tool-working-directory           tools, workingDirectory
+  tool-bash                        tools, systemPrompt, workingDirectory
+  tool-jobs                        tools, systemPrompt
+  tool-fs                          tools, systemPrompt, workingDirectory
+  tool-fs-search                   tools, systemPrompt, workingDirectory
+  agent-instructions               workingDirectory
+  tool-skill                       tools, workingDirectory
+  plan-mode                        tools, systemPrompt
+  subagent                         workingDirectory
+  agent-team                       subagents
+  tool-agent-team                  agentTeams, subagents, tools, systemPrompt
+  subagent-spawn-in-process        subagents
+  subagent-fork-in-process         subagents
+  tool-subagent-control            tools, subagents, systemPrompt
+  tool-subagent                    tools, subagents, systemPrompt
+  tool-subagent-fork               tools, subagents, systemPrompt
+  workflow-ptc                     subagents, workingDirectory
+  tool-workflow                    tools, workflowEngine, systemPrompt
+  timeout-policy                   tools
+  spill-policy                     tools
+  session-checkpoint-policy        tools
+  tool-todo                        tools
+  tool-goal                        tools, systemPrompt
+  tool-web                         tools, systemPrompt
+  mcp-resources                    tools
+  tools                            systemPrompt
+
+Full diagnostics: <harness>/tmp/book-home/logs/startup-2026-11-04T18-33-14.380Z-b03cab58-9aaf-4e00-80a0-2093b2a9743f.log
