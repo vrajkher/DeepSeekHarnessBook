@@ -16,6 +16,7 @@ const REPO = 'https://github.com/vrajkher/DeepSeekHarnessBook/blob/main/'
 
 const VIEWS = [
   ['README.md', 'top', 'શરૂઆત', 'Cover'],
+  ['book/overview-samagra-naksho.md', 'overview', 'સમગ્ર નકશો', 'પહેલાં વાંચો'],
   ['book/00-paayo-ane-pratham-run.md', 'ch0', 'પાયો અને પ્રથમ run', 'Level 0'],
   ['book/01-request-ni-musafari.md', 'ch1', 'એક requestની આખી મુસાફરી', 'Level 1'],
   ['book/02-cordis-plugin-architecture.md', 'ch2', 'Cordis અને plugin architecture', 'Level 2'],
@@ -87,9 +88,9 @@ for (const [file, view, title, eyebrow] of VIEWS) {
 }
 
 const navItem = t => `<li><a href="#${t.view}" data-view="${t.view}"><span class="nav-eyebrow">${esc(t.eyebrow)}</span><span class="nav-title">${esc(t.title)}</span></a>${
-  t.heads.length && t.view.startsWith('ch') ? `<ol class="sub">${t.heads.map(x => `<li><a href="#${x.id}">${esc(x.text)}</a></li>`).join('')}</ol>` : ''}</li>`
+  t.heads.length && (t.view.startsWith('ch') || t.view === 'overview') ? `<ol class="sub">${t.heads.map(x => `<li><a href="#${x.id}">${esc(x.text)}</a></li>`).join('')}</ol>` : ''}</li>`
 const groups = [
-  ['પ્રકરણો', toc.filter(t => t.view === 'top' || t.view.startsWith('ch'))],
+  ['પ્રકરણો', toc.filter(t => t.view === 'top' || t.view === 'overview' || t.view.startsWith('ch'))],
   ['પરિશિષ્ટ', toc.filter(t => t.view.startsWith('appendix') || t.view === 'citations' || t.view === 'labs')],
 ]
 const nav = groups.map(([label, items]) => `<p class="nav-group">${label}</p><ol class="nav-list">${items.map(navItem).join('')}</ol>`).join('')

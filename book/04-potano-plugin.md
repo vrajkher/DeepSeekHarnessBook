@@ -1,5 +1,7 @@
 # પ્રકરણ 4 — પોતાનો plugin બનાવો
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 4.** પહેલાં repository ના ચકાસેલા `greet` tutorial example માં સૌથી નાનો ઉપયોગી ફેરફાર કરીએ.
 > પછી એક read-only `csv_compare` tool બનાવીએ, જે બે CSV export સરખાવી matched અને unmatched records આપે — deterministic નિયમો સાથે.
 
@@ -208,6 +210,153 @@ book-csv-compare (file:///…/csv-inspect/src/plugin.ts): ValidationError: inval
 6. Tool ને disable કરવાના ત્રણ રસ્તા લખો.
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 4](../appendix/D-lab-solutions.md#ch4).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 4 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે; ઉપરનું પ્રકરણ જેમ હતું તેમ જ છે. આખો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 4 = પોતાનો કર્મચારી ભરતી કરવો: પહેલાં જૂના કર્મચારી (`greet`) ને નવી બોલી (configurable greeting) શીખવો, પછી નવો કર્મચારી (`csv_compare`) રાખો, જે બે યાદી સરખાવે — ક્યારેય અનુમાન વગર, ફક્ત વાંચીને, અને દરેક લીટીનો હિસાબ આપીને.**
+
+### ભોજનાલયની ઉપમામાં
+
+નવા કર્મચારીની ભરતી માટે ચાર વસ્તુ નક્કી કરવી પડે:
+
+| ભરતીનો પ્રશ્ન | Plugin માં | `csv_compare` માં |
+|---|---|---|
+| કયાં સાધન વગર કામ ન કરી શકે? | `inject` | `['tools', 'fs']` |
+| માલિક શું બદલી શકે? | `Config` | `toolName`, `maxBytes` |
+| ગ્રાહક (model) શું કહી શકે? | `parameters` | `left_path`, `right_path`, `key_columns`, `compare_columns?` |
+| કામનું પરિણામ શું, અને ગ્રાહકને શું કહેવું? | `output` (value + render) | JSON report + ટૂંકું text |
+
+**ઉપમા ક્યાં તૂટે છે:** સાચો કર્મચારી શંકા પડે તો અનુમાન કરી લે. આપણો tool **ક્યારેય અનુમાન નથી કરતો**: duplicate key હોય તો match કરતો નથી, ખરાબ header હોય તો row સ્વીકારતો નથી — અને એ બધું report માં કારણ સાથે લખે છે.
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) સૌથી નાનો ફેરફાર — `greet`
+
+મૂળ tutorial નો `greet` tool "Hello, Ada!" આપે. અમે **બે** ફેરફાર કર્યા:
+
+1. `Config` schema: `greeting: z.string().default('નમસ્તે')` — config ન આપો તો "નમસ્તે".
+2. `execute` માં `config.greeting` વાપર્યું.
+
+Overlay માં `greeting: 'કેમ છો'` આપો તો model ને "કેમ છો, Ada!" મળે. **શીખ:** deployment પ્રમાણે બદલાતી વસ્તુ code માં hardcode ન કરો; validated `Config` field બનાવો (repository નો નિયમ "No hardcoded tunables").
+
+#### (2) Canonical value vs rendered content
+
+- **Canonical value** = tool નું સાચું, structured પરિણામ (JSON report) — ચોપડા અને UI માટે.
+- **Rendered content** = model ને દેખાતું ટૂંકું text (`identical 1, different 1, …`).
+
+**ઉપમા:** canonical value = ગોદામનો પૂરો હિસાબ; rendered = ગ્રાહકને આપેલી નાની રસીદ.
+
+#### (3) Deterministic નિયમો — "અનુમાન નહીં, હિસાબ પૂરો"
+
+**Deterministic** એટલે એ જ input → હંમેશા byte-for-byte એ જ output. છ નિયમ:
+
+1. **Key** = key columns ની trimmed values.
+2. **Duplicate:** કોઈ પણ બાજુ key એકથી વધુ વાર → એક પણ row match નહીં; group માં **બંને બાજુની** lines (દા.ત. `DUPLICATE INV-1004 (left L5, L6; right L4)`).
+3. **Matched:** બંને બાજુ બરાબર એક વાર → compare columns થી identical કે differences.
+4. **Unmatched:** બાકીની rows પોતાની બાજુએ.
+5. **Problem:** field count ખોટો, quote બંધ નહીં; header માં ખાલી/પુનરાવર્તિત નામ → દરેક data row `INVALID_HEADER`.
+6. **Sorted:** બધું key, પછી line પ્રમાણે.
+
+**છેલ્લી ખાતરી (invariant):** દરેક input data line report માં **બરાબર એક જ** જગ્યાએ દેખાય. આ માટે ખાસ test છે.
+
+**યાદ-ચાવી "કી-ડુ-મે-બા-પ્ર-ક્ર":** **કી**, **ડુ**પ્લિકેટ, **મે**ળ, **બા**કી, **પ્ર**શ્ન (problem), **ક્ર**મ — "કીડી મેદાનમાં બાકી પ્રશ્ન ક્રમમાં".
+
+#### (4) Code review માંથી શીખ (Codex ના ત્રણ findings)
+
+PR review માં ત્રણ ખરી ભૂલો પકડાઈ, ત્રણેય "હિસાબ ખૂટે" પ્રકારની:
+
+| ભૂલ | જૂનું વર્તન | સુધારો |
+|---|---|---|
+| Header માં `Amount,Amount` | બીજો column પહેલાને ચૂપચાપ ઢાંકી દે; ખોટો identical match | આખી file ની rows નકારો (`INVALID_HEADER`) |
+| એક બાજુ duplicate, બીજી બાજુ એક row | એકલી row report માંથી ગાયબ | duplicate group માં બંને બાજુની lines |
+| (પ્રકરણ 7) `Debit` column જ નથી | ગેરહાજર column = શૂન્ય; ₹900 ગાયબ | configured column ન હોય તો સ્પષ્ટ config error |
+
+**શીખ:** "ચૂપચાપ સાચા દેખાતા" output સૌથી જોખમી છે. દરેક input row નો હિસાબ test થી સાબિત કરો.
+
+#### (5) Harness સાથે જોડાણના ત્રણ નિર્ણય
+
+1. **`ctx.fs` થી વાંચો, `node:fs` થી નહીં** — deployment નો filesystem provider અને sandbox નિયંત્રણમાં રહે; tool કદી write નથી કરતો.
+2. **`workingDirectory` optional** — હોય તો session ની directory માં path resolve; ન હોય (unit test) તો પણ tool ચાલે.
+3. **`isConcurrencySafe: () => true`** — ફક્ત reads; બીજા read-only calls સાથે parallel ચાલી શકે.
+
+#### (6) Overlay, ખોટી config, અને disable
+
+- **Overlay** absolute path થી row insert કરે.
+- **ખોટી config** (`maxBytes: -5`) → `ValidationError … $.maxBytes expected number >= 0` → tool register જ ન થાય → required નથી એટલે ફક્ત warning. **Fail loud.**
+- **Disable ના ત્રણ રસ્તા "ન-બી-કા":** overlay **ન** આપો; **બી**જું overlay `disabled: true`; **કા**યમ માટે profile `cordis.patch.yml`. Disable પછી model call કરે તો `UNKNOWN_TOOL`.
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| `defineTool` | schema-validated tool બનાવતી helper | `defineTool({ name, parameters, output, execute })` | "ભરતી ફોર્મ" |
+| Parameters | model મોકલી શકે તે arguments | `left_path` | "ગ્રાહકની માંગ" |
+| Config schema | deployment config ની validation | `z.natural().default(...)` | "માલિકના નિયમો" |
+| Schemastery (`z`) | config schema library | `z.object({...})` | "નિયમ-ચોપડી" |
+| CSV | comma થી અલગ કરેલી કોષ્ટક text file | `Ref,Date,Party,Amount` | "અલ્પવિરામ યાદી" |
+| Header | CSV ની પહેલી line, column નામો | `Ref,Amount` | "કોષ્ટકનું માથું" |
+| Key column | row ને ઓળખતો column | `Ref` | "ઓળખ નંબર" |
+| Deterministic | એ જ input → એ જ output | sorted report | "હંમેશા એ જ જવાબ" |
+| Invariant | હંમેશા સાચો રહેવો જોઈએ તે નિયમ | "દરેક line એક જ વાર" | "અટલ નિયમ" |
+| Fixture | test માટે તૈયાર નમૂના data | `export-a.csv` | "પ્રેક્ટિસ પેપર" |
+| Unit test | એક નાનો ભાગ એકલો ચકાસતો test | `compare.test.ts` | "એક પૈડું તપાસો" |
+| Integration test | અનેક ભાગ સાથે ચકાસતો test | `plugin.test.ts` | "આખી સાઇકલ ચલાવો" |
+| `node:test` | Node નો બિલ્ટ-ઇન test runner | `node --test` | "ઘરનો પરીક્ષક" |
+| Type check (`tsc`) | compile વખતે types ચકાસવા | exit 0 | "લેબલ તપાસ" |
+| Fail loud | ખોટી સ્થિતિ તરત, સ્પષ્ટ જણાવવી | `ValidationError` | "બૂમ પાડો, ચૂપ નહીં" |
+
+### યાદ રાખવાની રીતો
+
+- **ભરતીના ચાર પ્રશ્ન "સા-મા-ગ્રા-પ":** **સા**ધન (`inject`), **મા**લિક (`Config`), **ગ્રા**હક (`parameters`), **પ**રિણામ (`output`).
+- **"કીડી મેદાનમાં બાકી પ્રશ્ન ક્રમમાં"** — છ deterministic નિયમો.
+- **"ન-બી-કા"** — disable ના ત્રણ રસ્તા.
+- **"ચૂપ સાચું = ખતરનાક"** — review findings નો સાર.
+- **ચિત્ર:** બે ચોપડા બાજુ-બાજુ, વચ્ચે દોરા: એક-એક દોરો = match, ગૂંચવાયેલા દોરા = duplicate group, દોરા વગરની લીટી = unmatched.
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "`defineTool` એકલું tool register કરે." | `ctx.tools.register(...)` જોઈએ. |
+| "Duplicate માં પહેલી row match કરી લો." | એ guess છે; group review માટે રોકો. |
+| "ખોટી config હોય તો default વાપરશે." | Validation fail; tool register જ નહીં થાય. |
+| "Unit test pass = dsh માં ચાલશે." | Path resolution જુદું; headless turn થી પણ ચકાસો. |
+
+### પુનરાવર્તન કાર્ડ
+
+<details><summary>1. Plugin ના ચાર ભાગ?</summary>
+
+`inject`, `Config`, `parameters`, `output` (canonical value + render).
+</details>
+
+<details><summary>2. Duplicate key નું હવે report માં શું દેખાય?</summary>
+
+એક group, બંને બાજુની lines સાથે: `DUPLICATE INV-1004 (left L5, L6; right L4)`.
+</details>
+
+<details><summary>3. Header માં `Amount,Amount` હોય તો?</summary>
+
+કોઈ row સ્વીકારાતી નથી; `DUPLICATE_HEADER` અને દરેક data row માટે `INVALID_HEADER`.
+</details>
+
+<details><summary>4. Tool disable કર્યા પછી model call કરે તો?</summary>
+
+`Error: unknown tool "csv_compare"`, code `UNKNOWN_TOOL`.
+</details>
+
+### મિત્રને સમજાવો (3 મિનિટ)
+
+બે દુકાનોની વેચાણ યાદી સરખાવતાં "એક જ bill નંબર બે વાર" આવે ત્યારે કોઈ એક પસંદ કરવી કેમ ખોટું છે, તે મિત્રને audit ના ઉદાહરણથી સમજાવો.
+
+### આગલા પ્રકરણ સાથે જોડાણ
+
+તમારો tool હવે ચાલે છે. પ્રકરણ 5 પૂછે છે: **તૂટે ત્યારે શું?** — unknown tool, ખરાબ arguments, provider ની ભૂલ, અને Ctrl+C. પ્રકરણ 4 નો "ભૂલ crash નથી, `isError` result છે" નિયમ ત્યાં ચારેય નિષ્ફળતામાં સાબિત થશે.
 
 ---
 

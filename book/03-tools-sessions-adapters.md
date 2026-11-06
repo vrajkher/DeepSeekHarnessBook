@@ -1,5 +1,7 @@
 # પ્રકરણ 3 — Tools, sessions અને model adapters
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 3.** ત્રણ seam ને અંદરથી ખોલીએ: built-in `read` tool, DeepSeek model adapter, અને session log.
 > દરેક માટે: input schema/format, registration, execution, error handling, અને output conversion.
 
@@ -301,6 +303,158 @@ TOOL_ARGS='{"file_path":"packages"}' bash tmp/book-labs/request-trace/run-mock.s
 6. Interrupted session resume પછી turn 1 ના કયા events બાકી રહે છે?
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 3](../appendix/D-lab-solutions.md#ch3).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 3 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે; ઉપરનું પ્રકરણ જેમ હતું તેમ જ છે. આખો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 3 = ત્રણ ઓરડા અંદરથી: કોઠાર (`read` tool અને tool pipeline), રસોઇયાનો ફોન (DeepSeek adapter), અને ઓર્ડર-ચોપડો (session log, persistence, resume).**
+
+### ભોજનાલયની ઉપમામાં
+
+- **કોઠાર (tools):** રસોઇયો ચિઠ્ઠી મોકલે "README.md લાવો". કોઠારી પહેલાં ચિઠ્ઠી તપાસે (schema), પછી શેઠની નીતિ (pre-execute policy) જુએ, પછી સામાન શોધે (`ctx.fs`), અને સામાન સાથે એક સાફ લેબલ લગાવે (render). સામાન ન મળે તો "નથી" ની ચિઠ્ઠી પાછી મોકલે — ઝઘડો નહીં (`isError: true`).
+- **ફોન (adapter):** વેઈટર ગુજરાતીમાં વાત કરે છે (`GenerateOptions`), રસોઇયાની agency બીજી ભાષા (DeepSeek Messages wire format) સમજે છે. **Adapter = દુભાષિયો.** જવાબ ટીપે ટીપે (SSE) આવે, દુભાષિયો દરેક ટીપું ભોજનાલયની ભાષામાં (`StreamChunk`) ફેરવે.
+- **ચોપડો (session log):** દરેક ઘટના નવી લીટી; કંઈ ભૂંસાતું નથી. સાંજે દુકાન બંધ થાય (process exit), બીજા દિવસે એ જ ચોપડો ખોલીને ઓર્ડર આગળ ચલાવાય (resume).
+
+**ઉપમા ક્યાં તૂટે છે:** સાચો દુભાષિયો વાતચીતનો અર્થ પણ બદલી શકે. અહીં adapter **ફક્ત format** બદલે છે; loop, tools, session એ boundary ની ઉપર DeepSeek ની wire ભાષા ક્યારેય જાણતા નથી.
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) Capability seam — ત્રણ ભૂમિકા, એક સાંધો
+
+**Seam** = બદલી શકાય તેવો સાંધો, ત્રણ ભૂમિકા સાથે:
+
+| ભૂમિકા | સરળ અર્થ | Filesystem ઉદાહરણ |
+|---|---|---|
+| Service Definition | "આ કામ આવી રીતે માંગવું" — interface | `FileSystem` (abstract) |
+| Service Provider | ખરું કામ કરનાર | `dsh-fs-sandbox` |
+| Consumer | વાપરનાર | `read` tool |
+
+**ફાયદો:** provider બદલો (દા.ત. remote sandbox), consumer જરા પણ બદલવો પડતો નથી. **યાદ-ચાવી "નિ-ક-વા":** **નિ**યમ (definition), **ક**ારીગર (provider), **વા**પરનાર (consumer).
+
+#### (2) `read` tool ના પાંચ ભાગ — "ઇ-ન-ચ-ભ-રૂ"
+
+1. **ઇનપુટ schema** — `file_path` (ફરજિયાત), `offset`, `limit` (default 2000 lines).
+2. **નોંધણી** — `ctx.systemPrompt.section(...)` ("cat નહીં, read વાપરો" સૂચના) + `ctx.tools.register(defineTool(...))`.
+3. **ચલાવવું** — path ને session ની directory માં resolve કરો, એક `stat`, 10 MB થી મોટી file stream કરો, બાકીની એક સાથે વાંચો.
+4. **ભૂલ** — ત્રણ સ્તર: schema (`INVALID_ARGS`), value (`offset must be a positive integer`), filesystem (`FS_NOT_FOUND`, `FS_NOT_REGULAR_FILE`).
+5. **રૂપાંતર** — canonical value `{path, offset, lines, totalLines}` → `render` → model માટે `1: # DeepSeek Harness…` જેવું text; `presentationMeta` → UI card.
+
+**યાદ-ચાવી:** "**ઇનામ ચલાવ્યું, ભૂલ રૂપે**" (ઇ-ન-ચ-ભ-રૂ).
+
+#### (3) Tool pipeline — ચિઠ્ઠીથી ચોપડા સુધી
+
+```text
+raw JSON  →  parseArguments (ખરાબ JSON પણ સાચવે)
+          →  tool/call ચોપડામાં
+          →  tools/pre-execute (નીતિ, approval)  →  guards
+          →  tools/execute (around-wrapper)  →  tool.execute()
+          →  validate + render  (અથવા throw → "Error: …")
+          →  post-execute, finalize, tools/result
+          →  tool/result ચોપડામાં
+```
+
+**સૌથી મહત્વનો નિયમ:** tool ની કોઈ પણ નિષ્ફળતા **crash નથી**. `toolErrorResult` તેને `Error: <message>` text + `isError: true` માં ફેરવે છે; `error.info` (name, code) ચોપડામાં રહે છે, model ના text માં નહીં.
+
+#### (4) Adapter boundary — ઉપર શું, નીચે શું
+
+| Boundary ની ઉપર (loop, tools, session) | Boundary ની નીચે (DeepSeekAdapter) |
+|---|---|
+| `GenerateOptions` મોકલે | `serialize` → HTTP body |
+| `StreamChunk` વાંચે | `fetch …/messages`, `parseSse`, `translate` |
+| retry નિર્ણય (`agent/request-error`) | HTTP error → `LlmError` code (`AUTH`, `SERVER`, …) |
+| wire format જાણતું નથી | session log જાણતું નથી |
+
+**`llm/stream` waterfall:** દરેક model request આ ધોધમાંથી પસાર થાય; એટલે trace અને metrics plugins loop બદલ્યા વગર દરેક request જોઈ શકે.
+
+**Wire પર શું ગયું (lab માં ખરેખર જોયું):** body માં `messages`, `tools` (25), `system`, `thinking`, `stream: true`, અને બે DeepSeek-specific extensions: `dsh_session_log`, `dsh_plugin_packages`. Headers માં anonymous user id અને session id.
+
+**StreamChunk ના સાત પ્રકાર "બ્લો-ટે-રી-ટૂ-એન્ડ-યુ-ફિ":** `block-start`, `text-delta`, `reasoning-delta`, `tool-call-delta`, `block-end`, `usage`, `finish`.
+
+#### (5) Session log → model context
+
+- **`append`** ત્રણ ખાતરી આપે: data JSON હોવો જ જોઈએ (નહીં તો ત્યાં જ નિષ્ફળ), event deep-frozen (કોઈ બદલી ન શકે), અને `seq` = log ની લંબાઈ.
+- **Surface** = ચોપડાની એવી લીટીઓ જે model history બને: પાંચ પ્રકાર `system/message`, `developer/message`, `user/message`, `assistant/message`, `tool/result`. **યાદ-ચાવી "સિ-ડે-યુ-આ-ટૂ" — "સીડી યુવાન આગળ ટૂંકી".**
+- **`deriveMessages`** surface પરથી history બનાવે અને cache કરે.
+
+#### (6) Persistence અને resume
+
+- File: `$DSH_HOME/sessions/<cwd-key>/session-<uuid>/session.v4.jsonl.zstd` + `session.lock`.
+- પહેલી line header (`version: 4`), પછી એક line = એક event.
+- **Resume:** `--session-id <id>` થી એ જ ચોપડો ખૂલે; નવો `turn/start {"turn":2}` આગલા `seq` થી; `request/header` reason `resume`.
+- **Interrupted resume:** Ctrl+C વાળા turn 1 ની લીટીઓ (user message, ખાલી `assistant/attempt`, `turn/end aborted`) રહે છે; turn 2 એ history સાથે ફરી કામ પૂરું કરે.
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| Capability seam | ત્રણ ભૂમિકાવાળો બદલી શકાય તેવો સાંધો | `ctx.fs` | "નિ-ક-વા" |
+| Interface / abstract class | "શું કરવું" નું વચન, "કેવી રીતે" નહીં | `FileSystem` | "નોકરીનું વર્ણન" |
+| Tool executor | tool batch ચલાવતો provider | `NativeToolExecutor` | "કોઠારનો મુખ્ય" |
+| Tool pipeline | policy → body → result નો ક્રમ | `ToolExecutionPipeline` | "ચિઠ્ઠીનો રસ્તો" |
+| Canonical value | tool નું સાચું structured પરિણામ | `{path, lines}` | "સામાન પોતે" |
+| Render | value ને model માટે text બનાવવું | `1: # DeepSeek…` | "લેબલ" |
+| `isError` | આ result નિષ્ફળતા છે | `true` | "લાલ ચિઠ્ઠી" |
+| Adapter | harness ↔ provider wire નો દુભાષિયો | `DeepSeekAdapter` | "દુભાષિયો" |
+| HTTP / POST | web પર માંગ મોકલવાની રીત | `POST /v1/messages` | "ટપાલ" |
+| SSE | server થી એક-દિશાના event ટુકડા | `data: {...}` | "ટીપે ટીપે" |
+| `StreamChunk` | provider-neutral ટુકડો | `text-delta` | "ભોજનાલયની ભાષાનું ટીપું" |
+| Request extension | provider-specific વધારાનો body field | `dsh_session_log` | "ચિઠ્ઠી સાથે જોડાણ" |
+| Surface | model history બનાવતી log લીટીઓ | 5 પ્રકાર | "સીડી યુવાન આગળ ટૂંકી" |
+| Persistence | data ને disk પર ટકાવવું | JSONL file | "તિજોરી" |
+| zstd | compression format | `.jsonl.zstd` | "દબાવેલી પોટલી" |
+| Resume | જૂના session માં નવો turn | `--session-id` | "ગઈકાલનો ચોપડો ખોલવો" |
+
+### યાદ રાખવાની રીતો
+
+- **"નિ-ક-વા"** — seam ની ત્રણ ભૂમિકા.
+- **"ઇનામ ચલાવ્યું, ભૂલ રૂપે"** — `read` tool ના પાંચ ભાગ.
+- **"સીડી યુવાન આગળ ટૂંકી"** — પાંચ surface types.
+- **"દુભાષિયો ફક્ત ભાષા બદલે, અર્થ નહીં"** — adapter boundary.
+- **ચિત્ર:** ચોપડો, જેની દરેક લીટી પર નંબર (`seq`) અને તાળું (deep-freeze).
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "Tool નિષ્ફળ જાય તો agent crash થાય." | `toolErrorResult` તેને સામાન્ય result બનાવે છે. |
+| "Error code model ને દેખાય છે." | `error.info` log માં; model ને ફક્ત `Error: …` text. |
+| "Loop DeepSeek API નું format જાણે છે." | ફક્ત adapter જાણે; loop `StreamChunk` જ જુએ. |
+| "Resume એટલે ફરી શરૂઆતથી." | એ જ log, આગળનો `seq`, આખી history સાથે. |
+
+### પુનરાવર્તન કાર્ડ
+
+<details><summary>1. `read` tool ની ત્રણ error layers?</summary>
+
+Schema (`ToolArgsError`, `INVALID_ARGS`), value (`parseReadArgs` નો સામાન્ય Error), filesystem (`FS_NOT_FOUND`, `FS_NOT_REGULAR_FILE`).
+</details>
+
+<details><summary>2. Invalid JSON arguments આવે તો pipeline શું કરે?</summary>
+
+`parseArguments` raw string સાચવે, જેથી tool પોતાનું argument diagnostic આપી શકે; ખાલી string → `{}`.
+</details>
+
+<details><summary>3. Wire body માં DeepSeek-specific બે fields?</summary>
+
+`dsh_session_log` અને `dsh_plugin_packages`.
+</details>
+
+<details><summary>4. Directory ને `read` કરો તો?</summary>
+
+`Error: cannot read "…/packages": not a regular file`, code `FS_NOT_REGULAR_FILE`, turn `completed`.
+</details>
+
+### મિત્રને સમજાવો (3 મિનિટ)
+
+"દુભાષિયો" ઉપમા વાપરીને સમજાવો કે નવો model provider ઉમેરવા માટે loop કેમ બદલવો પડતો નથી (`ctx.llm.registerAdapter`).
+
+### આગલા પ્રકરણ સાથે જોડાણ
+
+તમે `read` tool અંદરથી જોયો: schema → `ctx.fs` → render → `tool/result`. પ્રકરણ 4 માં **આ જ ઢાંચાથી** તમારો પોતાનો tool `csv_compare` બનાવશો. Tool pipeline નો "ભૂલ crash નથી" નિયમ ત્યાં તમારા tests માં સાબિત થશે.
 
 ---
 
