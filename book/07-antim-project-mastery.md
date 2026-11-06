@@ -1,5 +1,7 @@
 # પ્રકરણ 7 — અંતિમ પ્રોજેક્ટ અને mastery પરીક્ષા
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 7.** Synthetic bank statement અને sample Tally export પર **read-only reconciliation workflow** બનાવીએ.
 > દરેક પરિણામ તેની input rows અને matching rule સુધી trace થાય. Fixtures માં malformed files, duplicate rows અને ambiguous matches છે.
 > પછી ભવિષ્યનો read-only Tally connector કેવી રીતે ફિટ થાય તે **extension** તરીકે ડિઝાઇન કરીએ, અને mastery પરીક્ષા આપીએ.
@@ -225,6 +227,163 @@ Fixture માં કંઈ બદલ્યા વગર `window_days: 0` સા
 5. Planted bug એ 10 tests માંથી કોઈને fail કેમ ન કર્યો?
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 7](../appendix/D-lab-solutions.md#ch7).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 7 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે; ઉપરનું પ્રકરણ જેમ હતું તેમ જ છે. આખો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 7 = દિવસના અંતે ગલ્લાનો હિસાબ: bank statement અને Tally નો ચોપડો બાજુ-બાજુ મૂકી, દરેક entry ને નિયમ પ્રમાણે જોડો, શંકાવાળી entries ને "review" માટે રોકો, અને દરેક પરિણામ પાછળ કઈ લીટી અને કયો નિયમ છે તે લખો — ક્યારેય ચોપડો બદલ્યા વગર.**
+
+### ભોજનાલયની ઉપમામાં
+
+સાંજે મુનીમજી બે ચોપડા ખોલે છે: bank ની પાસબુક અને પોતાનો Tally ચોપડો.
+
+1. **ફાટેલાં પાનાં અલગ** (V1 rejected): ખોટી તારીખ (`31-02-2026`), ખોટી રકમ (`12,00x.00`), debit અને credit બંને ભરેલાં, અધૂરી લીટી.
+2. **બે વાર છપાયેલી entry અલગ** (D1 duplicate): Joshi Pharma ₹6,100 બે વાર — કઈ સાચી તે અનુમાન નહીં, બંને review માટે.
+3. **ચેક/UTR નંબર અને રકમ બંને મળે → જોડો** (R1).
+4. **નંબર નથી, પણ રકમ સરખી અને તારીખ 3 દિવસની અંદર, અને ફક્ત એક જ ઉમેદવાર → જોડો** (R2).
+5. **એક bank entry સામે બે સરખી Tally entries → અનુમાન નહીં** (A1 ambiguous).
+6. **બાકી બધું → જોડ વગરનું** (U1 unmatched), કારણ સાથે.
+
+**ઉપમા ક્યાં તૂટે છે:** સાચા મુનીમજી ફોન કરીને પૂછી લે. આ tool **ફક્ત વાંચે અને અહેવાલ આપે**; કોઈ voucher બનાવતો કે બદલતો નથી. અંતિમ નિર્ણય માનવ reviewer નો.
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) સૌથી મોટી જાળ: બે sign convention
+
+| Export | પૈસા **આવ્યા** | પૈસા **ગયા** |
+|---|---|---|
+| Bank statement | Credit | Debit |
+| Tally bank ledger | Debit | Credit |
+
+બંને "દર્પણ" જેવાં ઊંધાં છે, કારણ કે bank પોતાની નજરથી લખે છે અને તમારો ચોપડો તમારી નજરથી. Code બંનેને એક જ ભાષામાં ફેરવે છે: **"bank account માં +"**. Bank: `credit − debit`; Tally: `debit − credit`.
+
+**યાદ-ચાવી:** "**બૅન્કનું ક્રેડિટ = તમારું ડેબિટ — અરીસામાં જુઓ.**"
+
+#### (2) ત્રણ normalization — "રૂ-તા-ન"
+
+- **રૂપિયા → paise integer:** `"1,23,456.50"` → `12345650`. Floating point નહીં, કારણ કે `0.1 + 0.2` computer માં બરાબર `0.3` નથી.
+- **તારીખ → ISO `YYYY-MM-DD`:** `1-Apr-2026`, `01/04/2026` બધું `2026-04-01`. `31-02-2026` જેવી અશક્ય તારીખ નકારાય.
+- **Reference normalize:** uppercase, ફક્ત અક્ષર-અંક, આંકડાવાળા ref ના આગળના શૂન્ય દૂર (`004512` = `4512`), `-` = ખાલી.
+
+**યાદ-ચાવી "રૂતાન" — "રૂપિયા, તારીખ, નંબર".**
+
+#### (3) નિયમોનો ક્રમ — "વ-દ-ર-ર-અ-અ" (V1, D1, R1, R2, A1, U1)
+
+**ક્રમ કેમ?** પહેલાં ખરાબ input બહાર (V1), પછી duplicates (D1), પછી સૌથી મજબૂત પુરાવો (R1: reference + amount), પછી નબળો (R2: amount + તારીખ), પછી શંકા (A1), અને અંતે બાકી (U1).
+
+**યાદ-ચાવી:** "**વધેલું દૂધ રાખો, રોજ અડધું અલગ**" — **વ**(V1) **દ**(D1) **ર**(R1) **ર**(R2) **અ**(A1) **અ**લગ(U1).
+
+#### (4) Connected components — "પહેલો આવે તે લઈ જાય" કેમ ખોટું
+
+**Greedy matching** = પહેલો મળે તે જોડી દો. પરિણામ input ના ક્રમ પર આધાર રાખે: file ની lines ઊંચી-નીચી કરો તો જવાબ બદલાય. **Connected component** = graph માં એકબીજા સાથે જોડાયેલું જૂથ. Tool દરેક જૂથ એક સાથે તપાસે: 1 bank + 1 Tally → match; મોટું → ambiguous. પરિણામ ક્રમથી સ્વતંત્ર.
+
+**ઉદાહરણ:** bank L5 (₹12,000, 5 Apr) સામે Tally L5 (5 Apr) અને L6 (6 Apr) — બંને 3 દિવસમાં → 1+2 નું જૂથ → **A1**. `window_days: 0` હોય તો ફક્ત L5 જોડાય → R2 match. **શીખ:** window એ business નિર્ણય છે, "વધુ સાચું" નહીં.
+
+#### (5) Golden report અને ત્રણ ખાતરીઓ
+
+- **Golden file** (`expected-report.txt`) = અપેક્ષિત output ની સ્થિર નકલ; library, tool pipeline, અને real headless turn ત્રણેયમાં byte-identical.
+- **Invariant:** "દરેક input row બરાબર એક result માં."
+- **હાથથી હિસાબ:** matched = 15,000 − 8,250.50 + 4,300 = ₹11,049.50; unexplained = (−59) − (6,100 − 2,500) = −₹3,659.00.
+
+#### (6) Config માં column names — અને ગેરહાજર column
+
+બીજી bank નું export? Overlay માં `bankColumns` બદલો, code નહીં. Configured column header માં **ન** હોય તો matching શરૂ થાય તે પહેલાં **`ReconcileConfigError`**: "bank export is missing configured column(s) … header is (…)". કેમ? નહીં તો ગેરહાજર `Debit` column ને શૂન્ય ગણી ₹900 નું withdrawal ગાયબ થાય અને entry ખોટી રીતે R1 match થાય — review માં પકડાયેલી ખરી ભૂલ.
+
+#### (7) Tally connector — extension design (અમલમાં નથી)
+
+ભવિષ્યમાં CSV ને બદલે સીધો Tally થી data: **capability seam** તરીકે.
+
+- **Definition:** `ctx.tallyLedger.listBankVouchers(...)` — **ફક્ત વાંચવાની** methods.
+- **Providers:** આજનો CSV provider, ભવિષ્યનો Tally connector.
+- **Consumer:** `reconcile_bank_tally` tool.
+
+પાંચ નિયમ: interface માં write method જ નહીં; provider swap = config; normalization consumer માં; network/credentials નો વિચાર; connector unreachable તો ખાલી યાદી નહીં, સ્પષ્ટ error.
+
+**યાદ-ચાવી:** "**ચાવી ફક્ત વાંચવાની આપો, લખવાની નહીં.**"
+
+#### (8) Debugging challenge નો મર્મ
+
+Planted bug: R2 માં `Math.abs(...)` — એટલે ₹100 **આવ્યા** અને ₹100 **ગયા** પણ match થાય. આખો 12 tests નો suite pass થાય છે! કેમ? કોઈ fixture માં એ જ રકમ, ઊંધી દિશા, window ની અંદર એવી જોડ નહોતી. **શીખ:** tests ફક્ત fixtures પરથી નહીં, **દરેક નિયમની દરેક શરત** (amount, sign, window, uniqueness) પરથી લખો.
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| Bank reconciliation | bank અને ચોપડાની entries જોડવી | `reconcile_bank_tally` | "ગલ્લાનો હિસાબ" |
+| Ledger / Tally | હિસાબી ચોપડો / હિસાબી software | Tally bank ledger | "મુનીમનો ચોપડો" |
+| Debit / Credit | હિસાબની બે બાજુ | bank credit = આવક | "અરીસામાં ઊંધું" |
+| Voucher | એક હિસાબી entry નો દસ્તાવેજ | `R-101` | "પહોંચ" |
+| UTR / cheque number | વ્યવહારનો ઓળખ નંબર | `N0914000123` | "રસીદ નંબર" |
+| Paise integer | રકમ પૈસામાં, દશાંશ વગર | `1500000` = ₹15,000 | "દશાંશ નહીં, ભૂલ નહીં" |
+| ISO date | `YYYY-MM-DD` તારીખ | `2026-04-01` | "વર્ષ પહેલું" |
+| Normalization | જુદાં રૂપને એક સરખા રૂપમાં લાવવું | `004512` → `4512` | "એક ભાષા" |
+| Greedy matching | પહેલો મળે તે જોડો | — | "પહેલો આવે તે લઈ જાય" |
+| Connected component | એકબીજા સાથે જોડાયેલું જૂથ | ambiguous group | "દોરાથી બંધાયેલા મણકા" |
+| Window (days) | તારીખનો સ્વીકાર્ય તફાવત | ±3 દિવસ | "છૂટની અવધિ" |
+| Golden file | અપેક્ષિત output ની નકલ | `expected-report.txt` | "આદર્શ જવાબપત્ર" |
+| Traceability | પરિણામથી input line અને નિયમ સુધી પહોંચાય | `bank L5 ↔ tally L5,L6 [A1]` | "પગેરું" |
+| Read-only | ફક્ત વાંચે, ક્યારેય બદલે નહીં | `ctx.fs.readText` | "જોવાની ચાવી" |
+| Property-based test | ઘણા random inputs પર નિયમ ચકાસતો test | `fast-check` | "હજાર સવાલ એક નિયમ" |
+| Synthetic data | ખોટાં પણ વાસ્તવિક દેખાતાં નમૂના data | Shah Traders | "રમકડાના રૂપિયા" |
+
+### યાદ રાખવાની રીતો
+
+- **"બૅન્કનું ક્રેડિટ = તમારું ડેબિટ — અરીસામાં જુઓ"** — sign convention.
+- **"રૂતાન"** — રૂપિયા, તારીખ, નંબર normalization.
+- **"વધેલું દૂધ રાખો, રોજ અડધું અલગ"** — V1, D1, R1, R2, A1, U1 નો ક્રમ.
+- **"મણકા દોરાથી"** — connected components; એક દોરામાં બે મણકા = match, વધુ = ambiguous.
+- **"ચાવી ફક્ત વાંચવાની"** — Tally connector નો read-only interface.
+- **ચિત્ર:** fixture-નકશાની table (7.3) ને "બાર ખાનાંની રમત" તરીકે યાદ રાખો — દરેક ખાનું એક નિયમ ચલાવે છે.
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "Duplicate માંથી એક રાખો." | બધી copies review માટે; એક પસંદ કરવી guess છે. |
+| "Window મોટી = વધુ matches = સારું." | વધુ ambiguity પણ; window business નિર્ણય છે. |
+| "ખરાબ rows ચૂપચાપ skip કરો." | Rejected result તરીકે રાખો; નહીં તો "બધું મેળ ખાય છે" નો ખોટો દેખાવ. |
+| "બધા tests pass = bug નથી." | Challenge નો bug 12 tests માંથી પસાર થાય છે. |
+| "Tool Tally માં સુધારો કરે." | ફક્ત read-only report. |
+
+### પુનરાવર્તન કાર્ડ
+
+<details><summary>1. Bank અને Tally ના signs કેમ ઊંધા?</summary>
+
+Bank પોતાની નજરથી લખે (credit = આવક); Tally bank ledger તમારી નજરથી (debit = આવક). Code બંનેને "bank માં +" માં ફેરવે.
+</details>
+
+<details><summary>2. નિયમોનો ક્રમ?</summary>
+
+V1 rejected → D1 duplicate → R1 ref+amount → R2 amount+window → A1 ambiguous → U1 unmatched.
+</details>
+
+<details><summary>3. `window_days: 0` પર શું બદલાય?</summary>
+
+Desai/Rana ambiguous ને બદલે bank L5 ↔ tally L5 R2 match; Mehta (1 દિવસ અલગ) બે unmatched બને.
+</details>
+
+<details><summary>4. Configured `Debit` column ગેરહાજર હોય તો?</summary>
+
+`ReconcileConfigError`, missing fields અને મળેલું header સાથે — matching શરૂ થાય તે પહેલાં.
+</details>
+
+<details><summary>5. Planted bug tests માંથી કેમ પસાર થયો?</summary>
+
+કોઈ fixture/test માં એ જ રકમ, ઊંધી દિશા, window ની અંદર એવી જોડ નહોતી.
+</details>
+
+### મિત્રને સમજાવો (5 મિનિટ) — અંતિમ કસોટી
+
+એક વેપારી મિત્રને, જે Tally વાપરે છે પણ programming નથી જાણતો, સમજાવો: (1) bank અને Tally ના debit/credit કેમ ઊંધા, (2) duplicate entry કેમ "review" માં રાખવી, (3) એક bank entry સામે બે સરખી Tally entries હોય ત્યારે tool કેમ અનુમાન નથી કરતો. ત્રણેય સમજાવી શકો તો આખા પુસ્તકનો મુખ્ય વિચાર — **"દરેક પરિણામ પાછળ પુરાવો"** — તમારો થઈ ગયો.
+
+### આખા પુસ્તક સાથે જોડાણ
+
+આ પ્રકરણ "ચાલુ-ચાલ-જોડ-અંદર-ઉમેર-તૂટ-બદલ-બનાવ" નું છેલ્લું પગથિયું છે. તેમાં પ્રકરણ 4 નો CSV parser, પ્રકરણ 3 નો `ctx.fs` નમૂનો, પ્રકરણ 5 નો read-only/fail-loud વિચાર, અને પ્રકરણ 6 નો "fix ને સાબિત કરો" નિયમ એક સાથે વપરાય છે. હવે [પરિશિષ્ટ E — mastery rubric](../appendix/E-mastery-rubric.md) સામે પોતાનું મૂલ્યાંકન કરો, અને [સમગ્ર નકશો](overview-samagra-naksho.md) ફરી એક વાર મોઢે બોલો.
 
 ---
 

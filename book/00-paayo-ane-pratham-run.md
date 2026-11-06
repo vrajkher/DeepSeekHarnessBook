@@ -1,5 +1,7 @@
 # પ્રકરણ 0 — પાયો અને પ્રથમ run
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 0.** આ પ્રકરણ terminal, Git, Node.js, pnpm અને આ repository વાંચવા જેટલું TypeScript શીખવે છે,
 > અને પછી Harness ને પહેલી વાર ચલાવે છે — API key વગર.
 
@@ -307,6 +309,134 @@ node --import tsx ../book-labs/cordis-basics/bin-with-logs.ts
 5. Lab 0 માં `--import tsx` કાઢી નાખો તો શું થશે એવી તમારી ધારણા છે, અને કેમ?
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 0](../appendix/D-lab-solutions.md#ch0).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 0 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે. ઉપરનું પ્રકરણ બદલાયું નથી; અહીં એ જ વાતો ધીમે, ઉપમા સાથે, અને યાદ રાખવાની રીતો સાથે ફરી સમજાવી છે.
+> આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 0 = ભોજનાલયનું તાળું ખોલવું: સાચું સરનામું (pinned commit), સાચી ચાવીઓ (Node, pnpm), અને પહેલી નાની વાનગી (પહેલો plugin) — API key વગર.**
+
+### ભોજનાલયની ઉપમામાં
+
+તમે નવા મેનેજર તરીકે ભોજનાલયમાં આવ્યા છો. પહેલા દિવસે તમે રસોઈ નથી બનાવતા. તમે ફક્ત:
+
+1. **સાચી શાખામાં** જાઓ છો: એક જ ભોજનાલયની ઘણી શાખાઓ (versions) છે; આપણે `fcc0ad4` નામની શાખામાં જ રહીશું. આ **pin** છે.
+2. **ચાવીઓ** લો છો: Node.js (દરવાજાની ચાવી), pnpm (કોઠારની ચાવી, જે સામાન લાવી ગોઠવે છે), Git (ચોપડાની ચાવી, જે ઇતિહાસ સાચવે છે).
+3. **બધી લાઈટ ચાલુ** કરો છો: `pnpm run build` એટલે આખા ભોજનાલયની તૈયારી — 10 તપાસ (gates) પાસ થાય.
+4. **એક નાનો ચા નો કપ** બનાવો છો: `hello.ts` plugin, જે ફક્ત એક line છાપે છે.
+
+**ઉપમા ક્યાં તૂટે છે:** ભોજનાલયમાં ખોટો રસ્તો લો તો તરત ખબર પડે. અહીં `cordis.yml` માં path ની spelling ભૂલ હોય તો process **ચૂપચાપ** exit 0 થાય છે — કોઈ ભૂલ દેખાતી નથી. એટલે જ પ્રકરણમાં `bin-with-logs.ts` launcher આપ્યો છે.
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) પાંચ શબ્દો — model, provider, agent, harness, plugin
+
+આ પાંચ શબ્દોને **"નાનાથી મોટું"** ક્રમમાં ગોઠવો:
+
+- **Model** સૌથી અંદર છે: ફક્ત વિચારે છે, એટલે text લે છે અને text કે tool call આપે છે. તેની પાસે હાથ નથી.
+- **Provider** model ને network પર મૂકે છે: "model ને ફોન કરવાનો નંબર".
+- **Agent** એ loop છે જે model ને વારંવાર પૂછે, model માંગે તે tool ચલાવે, અને પરિણામ પાછું આપે.
+- **Harness** એ આખું તંત્ર છે: agent + tools + ચોપડો (session log) + સુરક્ષા (sandbox) + UI.
+- **Plugin** એ harness ની એક ઈંટ છે. DeepSeek Harness માં **agent loop પોતે પણ plugin છે** — આ આખા પુસ્તકનો સૌથી મહત્વનો વિચાર છે.
+
+**યાદ-ચાવી "મો-પ્રો-એ-હા-પ્લ" (મોટો પ્રોફેસર એક હાથે પ્લેટ):** **મો**ડેલ, **પ્રો**વાઇડર, **એ**જન્ટ, **હા**ર્નેસ, **પ્લ**ગિન — અંદરથી બહાર.
+
+#### (2) Pin કેમ જરૂરી છે
+
+Repository નું README પોતે કહે છે કે compatibility-breaking ફેરફારો આવશે. જો તમે આજે `master` અને આવતા મહિને ફરી `master` ખોલો, તો line numbers અને વર્તન જુદાં હોઈ શકે. **Commit SHA** એ code ના ફોટા જેવું છે: ફોટો બદલાતો નથી. તેથી પુસ્તકની દરેક link `blob/fcc0ad4…/` થી શરૂ થાય છે, અને `git log -1` થી તમે ચકાસો છો કે તમે એ જ ફોટામાં ઊભા છો.
+
+#### (3) Node, Corepack, pnpm — ત્રણ સ્તર
+
+| સ્તર | શું કરે છે | ભૂલ થાય તો દેખાય |
+|---|---|---|
+| Node.js 24 | JavaScript/TypeScript ચલાવે | જૂનું Node: install/build નિષ્ફળ (`engines >=24.9.0`) |
+| Corepack | `package.json` નું `packageManager` વાંચી સાચો pnpm લાવે | `pnpm --version` ખોટો version બતાવે |
+| pnpm 11.28.5 | 1,400+ dependencies લાવી workspace ગોઠવે | install અટકે; અમારા sandbox માં એક CDN blocked હતું |
+
+#### (4) TypeScript ના પાંચ pattern — કેમ મહત્વના
+
+તમારે આખું TypeScript શીખવાની જરૂર નથી; આ repository વાંચવા પાંચ વસ્તુ પૂરતી છે:
+
+1. **`import type`** — ફક્ત નામ-ઓળખ લાવે, runtime પર કંઈ નહીં. "મહેમાનની યાદી", મહેમાન પોતે નહીં.
+2. **Declaration merging** — બીજા package ના interface માં નવું field ઉમેરવું. `ctx.tools` જેવા નામો TypeScript ને આ રીતે જ ખબર પડે છે.
+3. **Discriminated union** — એક `kind` field જોઈને આકાર નક્કી થાય: `{ kind: 'enter' }` કે `{ kind: 'reject' }`. "ટપાલ પર લાલ કે લીલું stamp".
+4. **`satisfies never`** — "બધા કેસ handle કર્યા" એવું compiler પાસે સાબિત કરાવવું. કોઈ નવો કેસ ઉમેરો અને ભૂલી જાઓ તો compile જ નહીં થાય.
+5. **`AbortSignal`** — ચાલુ કામ રદ કરવાનો signal. પ્રકરણ 5 માં Ctrl+C આ જ રીતે આખા loop સુધી પહોંચે છે.
+
+#### (5) પહેલો plugin — ત્રણ ભાગ
+
+`hello.ts` માં ત્રણ જ વસ્તુ છે: `name` (ઓળખ), `apply(ctx)` (Cordis plugin load કરે ત્યારે બોલાવે), અને `cordis.yml` (કયા plugins mount કરવા તેની યાદી). Launcher (`vendor/cordis/bin.js`) ફક્ત ત્રણ કામ કરે: root `Context` બનાવે, `Loader` mount કરે, અને `cordis.yml` વાંચવા Include ને કહે.
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | રોજિંદું ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| Terminal | લખીને computer ને આદેશ આપવાની બારી | `ls` લખો, files દેખાય | "ટપાલની બારી" — લખો, જવાબ આવે |
+| Repository | project ની બધી files + ઇતિહાસ | `deepseek-harness` folder | "ભંડાર" |
+| Clone | repository ની પૂરી નકલ પોતાના machine પર | `git clone …` | "ફોટોકોપી" |
+| Commit / SHA | ઇતિહાસનો એક નામવાળો ફોટો | `fcc0ad4` | "ફોટાની પાછળ લખેલો નંબર" |
+| Detached checkout | branch વગર સીધા commit પર ઊભા રહેવું | `git checkout --detach …` | "પ્રવાસી, રહેવાસી નહીં" |
+| Dependency | બીજાનો code જે આપણો project વાપરે | `vitest`, `tsx` | "ઉધાર લીધેલું વાસણ" |
+| Package manager | dependencies લાવી ગોઠવતું tool | pnpm | "કોઠારી" |
+| Build | source ને ચલાવી શકાય તેવા રૂપમાં ફેરવવું + તપાસ | `pnpm run build`, 10 gates | "રસોઈ પહેલાંની તૈયારી" |
+| Runtime | code ચાલતી વખતનું વાતાવરણ | Node.js | "રસોડું ચાલુ હોય તે સમય" |
+| Type | value કેવા પ્રકારની છે તેની નોંધ | `n: number` | "ડબ્બા પરનું લેબલ" |
+| Plugin | `apply(ctx)` વાળો નાનો module | `hello.ts` | "ઈંટ" |
+| `cordis.yml` | કયા plugins ચલાવવા તેની યાદી | `- name: './hello.ts'` | "આજનું મેનુ" |
+| Exit code | process પૂરું થાય ત્યારે આપતો આંકડો; 0 = સફળ | `echo $?` → 0 | "0 = બધું બરાબર" |
+| WSL2 | Windows ની અંદર સાચું Linux | `wsl --install` | "ઘરમાં બીજું ઘર" |
+
+### યાદ રાખવાની રીતો
+
+- **ત્રણ ચાવી, એક ફોટો:** Node + Corepack/pnpm + Git = ત્રણ ચાવી; `fcc0ad4` = એક ફોટો. Setup ભૂલાય તો આ વાક્ય બોલો: *"ત્રણ ચાવી લો, એક ફોટામાં ઊભા રહો."*
+- **"ચૂપ plugin" ચેતવણી:** આ પ્રકરણની સૌથી મહત્વની શીખ ચિત્ર જેવી યાદ રાખો — એક plugin જે મોં પર આંગળી રાખી ઊભો છે. "exit 0 નો અર્થ હંમેશા 'બધું બરાબર' નથી."
+- **ત્રણ plugin આકાર "ફ-ઓ-ક":** **ફ**ંક્શન, **ઓ**બ્જેક્ટ, **ક**્લાસ. ક્લાસ ત્યારે જ, જ્યારે બીજાને service આપવી હોય.
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "Model પોતે README ખોલે છે." | Model ફક્ત `read` tool ચલાવવાની માંગણી લખે છે; file harness ખોલે છે (પ્રકરણ 1). |
+| "Exit 0 એટલે plugin ચાલ્યો." | Pinned commit પર throw થતો plugin પણ exit 0 આપે છે; logger જોવો પડે. |
+| "Pin વગર પણ પુસ્તક ચાલશે." | Line numbers અને વર્તન બદલાઈ શકે; permalinks ખોટી જગ્યાએ દોરી જાય. |
+| "API key વગર કંઈ ચલાવી નહીં શકાય." | આખું પુસ્તક key વગર mock provider સાથે ચાલે છે. |
+
+### પુનરાવર્તન કાર્ડ
+
+જવાબ જોયા પહેલાં મોટેથી બોલો, પછી ખોલો.
+
+<details><summary>1. Harness અને agent માં શું ફરક?</summary>
+
+Agent = model ↔ tools નો loop. Harness = loop + tools + session log + sandbox + UI + adapters; અને DeepSeek Harness માં loop પોતે પણ એક plugin છે.
+</details>
+
+<details><summary>2. `pnpm dsh` ખરેખર શું ચલાવે?</summary>
+
+`node --import tsx/esm apps/cli/src/bin.ts` (root `package.json` નો `scripts.dsh`).
+</details>
+
+<details><summary>3. `tmp/` માં labs કેમ ચાલે છે?</summary>
+
+`tsx` repository ના tsconfig `paths` વાપરીને `@deepseek-ai/*` packages ને source માંથી શોધે છે.
+</details>
+
+<details><summary>4. `apply` throw કરે ત્યારે pinned commit પર શું થાય?</summary>
+
+Exit 0, કોઈ output નહીં; error ફક્ત logger માં જાય છે. `bin-with-logs.ts` વડે `FAILED` દેખાય છે.
+</details>
+
+### મિત્રને સમજાવો (2 મિનિટ)
+
+એક મિત્રને, જેણે ક્યારેય programming નથી કર્યું, આ ત્રણ વાક્યમાં સમજાવો: (1) model અને harness નો ફરક, (2) pin શા માટે, (3) પહેલો plugin શું કરે છે. જ્યાં અટકો ત્યાં ઉપરનો વિભાગ ફરી વાંચો.
+
+### આગલા પ્રકરણ સાથે જોડાણ
+
+હવે ભોજનાલય ખુલ્લું છે અને તમે એક નાની વાનગી બનાવી છે. પ્રકરણ 1 માં તમે **એક સાચો ઓર્ડર** — "README વાંચીને ગુજરાતી સાર આપો" — દરવાજાથી થાળી સુધી અનુસરશો. આ પ્રકરણનું `tmp/` + `tsx` જ્ઞાન ત્યાં દરેક lab માં વપરાશે.
 
 ---
 

@@ -1,5 +1,7 @@
 # પ્રકરણ 2 — Cordis અને plugin architecture
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 2.** પ્રકરણ 1 માં *request* ચાલતો જોયો. અહીં તેના પહેલાનો સમય જોઈએ: **startup**.
 > Profile અને configuration કેવી રીતે ચાલતા plugin graph માં ફેરવાય છે, અને Cordis શું સંભાળે છે તથા Harness ઉપર શું બનાવે છે.
 
@@ -291,6 +293,149 @@ cd tmp/book-labs/cordis-basics && cp cordis.executor-last.yml cordis.yml && node
 6. Effect disposers કયા ક્રમમાં ચાલે છે, અને તે કેમ મહત્વનું છે?
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 2](../appendix/D-lab-solutions.md#ch2).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 2 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે; ઉપરનું પ્રકરણ જેમ હતું તેમ જ છે. આખો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 2 = ભોજનાલય સવારે કેવી રીતે ખૂલે છે: "આજનું મેનુ" (profile + patches) નક્કી થાય, મેનેજર (Cordis) દરેક કર્મચારીને (plugin) ત્યારે જ કામ પર લે જ્યારે તેને જોઈતાં સાધનો (services) હાજર હોય, અને અંતે હાજરીપત્રક (startup audit) તપાસાય.**
+
+### ભોજનાલયની ઉપમામાં
+
+- **Profile** = "આજે કયું ભોજનાલય?" — `headless` (ફક્ત એક ઓર્ડર, ગ્રાહક-હૉલ વગર), `web` (હૉલ સાથે), `sdk`, `acp`.
+- **Bundle** = તૈયાર મેનુ-પાનું: `dsh-base` (દરેક શાખામાં જોઈએ તે બધું) + `dsh-headless` (આ શાખાના ફેરફાર).
+- **Patch / overlay** = મેનુ પર ચોંટાડેલી ચિઠ્ઠી: "આજે title-બનાવનાર કર્મચારી રજા પર" (`- id: session-title-llm  disabled: true`).
+- **Row** = મેનુની એક લીટી = એક plugin.
+- **Service** = સાધન જે એક કર્મચારી બીજાને આપે: `tools` (સાધન-ઘર), `fs` (કોઠાર), `llm` (રસોઇયાનો ફોન).
+- **`inject`** = કર્મચારીની શરત: "કોઠારની ચાવી (`fs`) મળે તો જ હું કામ શરૂ કરીશ."
+- **Startup audit** = મેનેજરનું હાજરીપત્રક: કોણ આવ્યું (`ACTIVE`), કોણ રાહ જુએ છે (`PENDING`), કોણ બીમાર પડ્યું (`FAILED`). જરૂરી કર્મચારી (agent loop, executor) ગેરહાજર હોય તો ભોજનાલય ખૂલે જ નહીં (exit 1).
+
+**ઉપમા ક્યાં તૂટે છે:** મેનુમાં ઉપર લખેલી વાનગી પહેલાં બને એવું **નથી**. બધી rows **એક સાથે** શરૂ થાય છે; ક્રમ ફક્ત `inject` થી આવે છે. Tutorial નો race આ જ ભૂલથી થયો.
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) Startup અને request — બે અલગ ઘડિયાળ
+
+| | Startup | Request |
+|---|---|---|
+| ક્યારે | process શરૂ થાય ત્યારે, **એક** વાર | દરેક user સંદેશ પર |
+| કોણ | launcher + Cordis Loader | agent loop |
+| ભૂલ | entry pending/failed, required હોય તો exit 1 | turn error/aborted, tool isError |
+
+**યાદ-ચાવી:** "**સવારે દુકાન ખૂલે (startup), આખો દિવસ ઓર્ડર (request).**"
+
+#### (2) Layers નો ક્રમ — "પાછળ આવે તે જીતે"
+
+1. Bundles (`dsh.profile.bundles` નો ક્રમ: base, પછી headless)
+2. Profile નું પોતાનું `cordis.patch.yml`
+3. `$DSH_HOME/cordis.patch.yml`
+4. તમારા `--patch` overlays, argv ના ક્રમમાં
+5. Telemetry switch
+
+એક જ row (id) ને બે layers બદલે તો **પાછળનું layer જીતે**. એટલે તમારું `--patch` base ની ઉપર હોય છે.
+
+**યાદ-ચાવી "બ-પ્રો-ઘ-પે-ટે":** **બ**ંડલ, **પ્રો**ફાઇલ, **ઘ**ર (home), **પે**ચ, **ટે**લિમેટ્રી — "બપોરે ઘરે પેટી ટેબલ પર".
+
+#### (3) Root config ખાલી `[]` કેમ?
+
+આખું composition patches માં છે. ખાલી `cordis.yml` ફક્ત Loader ને "ઘરનું સરનામું" (`baseUrl`) આપે છે. તેની આડઅસર: overlay માં તમારા plugin નો path **absolute** જોઈએ, કારણ કે relative path profile directory સામે શોધાય છે, overlay file ની જગ્યા સામે નહીં.
+
+#### (4) Cordis ના પાંચ ઘટક — "સે-ફા-ઈ-ઇ-લો"
+
+1. **Service registration (સે)** — `Service` constructor અંતે `ctx.reflect.provide(name, self)` બોલાવે. એક જ નામે બીજો provider આવે તો error: "service … has been registered at …". **"એક ખુરશી, એક જ માણસ."**
+2. **Fiber (ફા)** — દરેક plugin નું જીવન: `PENDING → LOADING → ACTIVE`, અથવા `FAILED`; unload પર `UNLOADING → DISPOSED`.
+3. **Effect (ઈ)** — undo થઈ શકે તેવી નોંધણી. Unload વખતે **ઊંધા ક્રમમાં** undo થાય: છેલ્લે બનેલું પહેલાં જાય, કારણ કે તે પહેલાંના પર આધાર રાખી શકે. **"પાછળથી ચડ્યો, પહેલો ઊતરે."**
+4. **Events (ઇ)** — `emit` (ફક્ત જાણ), `waterfall` (`next()` વાળી સાંકળ), `parallel`, `serial`, `bail`. દરેક event નો mode તેના contract નો ભાગ છે.
+5. **Loader/Include (લો)** — YAML rows વાંચે, patches લગાવે, `!!js` expressions ચલાવે.
+
+#### (5) Cordis શું આપે, Harness શું બનાવે
+
+Cordis = ખાલી ભોજનાલયનું **માળખું**: ખુરશીઓ (services), હાજરી (fibers), ચોપડા-નિયમ (effects), ઘંટડીઓ (events), મેનુ-વાચક (Loader).
+Harness = **ખરું ભોજનાલય**: કયા કર્મચારી (`tools`, `llm`, `sessions`, `fs`…), કયું મેનુ (profiles/bundles), હાજરીનો નિયમ (required entries), અને agent દીઠ અલગ ખૂણો (**scope**).
+
+#### (6) Pending vs fatal — લેબનો મુખ્ય પાઠ
+
+- `fs-sandbox` બંધ → `fs` નથી → `working-directory` pending → જેને `workingDirectory` જોઈએ તે બધા pending → **18 entries pending**, પણ એકેય required નથી → **ફક્ત warning**, app ચાલે (file tools વગર).
+- `system-prompt` બંધ → `tools` આવતું નથી (તે `systemPrompt` inject કરે છે) → `agent-loop` અને `tool-executor-native` (બંને required) pending → **startup failed, exit 1**.
+
+**યાદ-ચાવી:** "**એક ઈંટ ખેંચો, દીવાલ જુઓ:** ઈંટ શણગારની હોય તો ખૂણો ખાલી, પાયાની હોય તો ઘર પડે."
+
+#### (7) Tutorial race — કેમ `inject` બચાવી ન શક્યું
+
+`greet-tool` ફક્ત `tools` inject કરે છે. **Executor service નથી**; તે `ctx.tools.setExecutor(...)` થી નોંધાય છે. `inject` ફક્ત services ની રાહ જોઈ શકે. તેથી `apply` ની અંદરનો demo call executor row પહેલાં ચાલે તો હારે. ઉપાય: demo call પહેલાં `await ctx.get('loader')?.await()` — "બધા કર્મચારી આવી જાય પછી પહેલો ઓર્ડર." 3/3 runs સફળ.
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| Startup | process શરૂ થતાં plugin tree બનવું | `boot()` | "દુકાન ખૂલવી" |
+| Profile | bundles + patches નું નામવાળું composition | `headless` | "શાખા" |
+| Bundle | config rows નું તૈયાર પેકેજ | `dsh-base` | "તૈયાર મેનુ-પાનું" |
+| Patch / overlay | row ને id થી બદલતી/ઉમેરતી YAML | `disabled: true` | "ચિઠ્ઠી" |
+| Row / entry | config ની એક લીટી = એક plugin | `- id: tools` | "મેનુ લીટી" |
+| `--dump-config` | અંતિમ composition છાપવું | 101 rows | "આજનું પૂરું મેનુ" |
+| Context (`ctx`) | services રાખતો Cordis object | `ctx.tools` | "ભોજનાલયની ઇમારત" |
+| Service | `ctx` પર નામવાળી સેવા | `ctx.fs` | "ખુરશી પરનો કર્મચારી" |
+| Dependency Injection | plugin ને જરૂરી service runtime આપે | `inject = ['tools']` | "સાધન મળે તો કામ" |
+| Fiber | plugin નું runtime અને જીવનચક્ર | `FAILED` | "હાજરી કાર્ડ" |
+| Effect / disposer | undo થઈ શકે તેવી નોંધણી / તેને undo કરતી function | `register()` નો return | "ઉધારની પહોંચ" |
+| Pending | જરૂરી service ની રાહ | `waiting for service: fs` | "રાહ જોતો કર્મચારી" |
+| Required entry | inactive હોય તો startup fail | `agent-loop` | "પાયાની ઈંટ" |
+| Scope | agent દીઠ registrations નો અલગ ખૂણો | `createScope` | "અલગ ટેબલ" |
+| Race condition | પરિણામ ચાલવાના ક્રમ પર આધાર રાખે | tutorial ch.7 | "દોડની સ્પર્ધા" |
+| `!!js` | YAML માં JavaScript expression | `!!js process.cwd()` | "મેનુમાં ગણતરી" |
+
+### યાદ રાખવાની રીતો
+
+- **"સવારે દુકાન, દિવસે ઓર્ડર"** — startup vs request.
+- **"બપોરે ઘરે પેટી ટેબલ પર"** — layers નો ક્રમ (બંડલ, પ્રોફાઇલ, ઘર, પેચ, ટેલિમેટ્રી).
+- **"સે-ફા-ઈ-ઇ-લો"** — Cordis ના પાંચ ઘટક.
+- **"એક ખુરશી, એક માણસ"** — duplicate service error.
+- **"પાછળથી ચડ્યો, પહેલો ઊતરે"** — effects નો LIFO disposal.
+- **ચિત્ર:** એક વૃક્ષ, જેના મૂળમાં `systemPrompt` છે; મૂળ કાપો તો `tools`, પછી `agent-loop` સુકાય.
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "YAML માં ઉપરની row પહેલાં load થાય." | Rows concurrently શરૂ થાય; ક્રમ `inject` થી. |
+| "Plugin load ન થાય તો હંમેશા crash." | Optional entry ફક્ત warning આપે; required જ fatal. |
+| "Overlay માં relative path ચાલે." | Absolute path જોઈએ. |
+| "Cordis = DeepSeek Harness." | Cordis માળખું છે; services, profiles, audit Harness બનાવે છે. |
+
+### પુનરાવર્તન કાર્ડ
+
+<details><summary>1. Layers નો ક્રમ અને કોણ જીતે?</summary>
+
+Bundles → profile patch → home patch → `--patch` → telemetry; પાછળનું જીતે.
+</details>
+
+<details><summary>2. `fs` ખૂટે તો શું, `systemPrompt` ખૂટે તો શું?</summary>
+
+`fs`: 18 entries pending, warning, app ચાલે. `systemPrompt`: required `agent-loop` અને `tool-executor-native` pending, exit 1.
+</details>
+
+<details><summary>3. Duplicate service પર Cordis શું કરે?</summary>
+
+`ReflectService.provide` error ફેંકે: `service "<name>" has been registered at <fiber>`.
+</details>
+
+<details><summary>4. Tutorial race નો deterministic ઉપાય?</summary>
+
+Executor row ઉમેરો, અને demo call પહેલાં `await ctx.get('loader')?.await()`.
+</details>
+
+### મિત્રને સમજાવો (3 મિનિટ)
+
+"એક કર્મચારી રજા પર હોય તો ભોજનાલય ક્યારે ચાલે અને ક્યારે બંધ રહે?" — આ પ્રશ્નનો જવાબ `fs` અને `systemPrompt` ના બે ઉદાહરણથી આપો.
+
+### આગલા પ્રકરણ સાથે જોડાણ
+
+હવે તમે જાણો છો કે કર્મચારીઓ કેવી રીતે આવે છે. પ્રકરણ 3 માં ત્રણ મુખ્ય કર્મચારીઓના **રૂમ અંદરથી** ખોલીશું: `read` tool (કોઠાર), DeepSeek adapter (રસોઇયાનો ફોન), અને session log (ચોપડો). `inject`, effect અને waterfall ત્યાં દરેક લીટીમાં દેખાશે.
 
 ---
 

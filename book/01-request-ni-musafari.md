@@ -1,5 +1,7 @@
 # પ્રકરણ 1 — એક requestની આખી મુસાફરી
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 1.** આખા પ્રકરણમાં એક જ ઉદાહરણ: **"આ repositoryનું README વાંચીને ગુજરાતી સાર આપો."**
 > આપણે તેને terminal થી લઈને બે model calls, એક `read` tool call અને final answer સુધી, code ની દરેક માલિકી સાથે અનુસરીશું.
 
@@ -334,6 +336,134 @@ TITLE=on bash tmp/book-labs/request-trace/run-mock.sh
 6. Model history કઈ function થી બને છે, અને તે memory ના કોઈ અલગ array ને બદલે log માંથી કેમ બને છે?
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 1](../appendix/D-lab-solutions.md#ch1).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 1 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે; ઉપરનું પ્રકરણ જેમ હતું તેમ જ છે. આખો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 1 = એક ઓર્ડર દરવાજાથી થાળી સુધી અનુસરવો: ઓર્ડર લખાય, રસોઇયાને બે વાર પૂછાય, વચ્ચે એક વાર કોઠારમાંથી રેસીપી-ચોપડી લવાય, અને દરેક પગલું ચોપડામાં નોંધાય.**
+
+### ભોજનાલયની ઉપમામાં
+
+ગ્રાહક (તમે) કહે છે: "README વાંચીને ગુજરાતી સાર આપો."
+
+1. **વેઈટર** (agent loop) ઓર્ડર-ચોપડામાં લખે છે: "ઓર્ડર નં. 1 શરૂ" (`turn/start`).
+2. વેઈટર **રસોઇયા** (model) પાસે જાય છે અને સાથે લઈ જાય છે: ભોજનાલયના નિયમો (system prompt), ગ્રાહકનો ઓર્ડર, ઘરના ખાસ નિયમો (`AGENTS.md`), આજની તારીખ-સ્થળ (runtime context), અને "આપણી પાસે કયા 25 સાધનો છે" તેની યાદી (tools). આ **પહેલી વાતચીત** છે (step 1, model call #1).
+3. રસોઇયો કહે છે: "મારે રેસીપી-ચોપડી જોઈએ — `read README.md`" (tool call).
+4. વેઈટર કોઠારમાં જાય, ચોપડી લાવે (tool execution), અને ચોપડામાં લખે: "આ માંગ્યું, આ મળ્યું" (`tool/call`, `tool/result`).
+5. વેઈટર **ફરી** રસોઇયા પાસે જાય, આ વખતે ચોપડીનું પાનું સાથે (step 2, model call #2).
+6. રસોઇયો હવે વાનગી બનાવે: ગુજરાતી સાર (text). કોઈ નવું સાધન નથી માંગતો.
+7. વેઈટર લખે: "ઓર્ડર નં. 1 પૂર્ણ" (`turn/end completed`) અને થાળી પીરસે (stdout).
+
+**ઉપમા ક્યાં તૂટે છે:** સાચો વેઈટર રસોઇયાને દરેક વખતે આખી કહાની નથી કહેતો. અહીં **દરેક model call માં આખો ઇતિહાસ** (ચોપડામાંથી ફરી બનાવેલો) જાય છે — call #1 માં 5 messages, call #2 માં 7. Model ને "યાદ" નથી રહેતું; યાદ ચોપડો રાખે છે.
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) Turn અને step — ઘડિયાળ અને મિનિટ-કાંટો
+
+- **Turn** = એક ઓર્ડરનું આખું કામ. શરૂ: `turn/start`. અંત: `turn/end`, કારણ સાથે (`completed`, `error`, `aborted`, `blocked`, `max-tokens`).
+- **Step** = રસોઇયા સાથેની એક વાતચીત + તેણે માંગેલા સાધનો.
+- એક turn માં શૂન્ય, એક, કે ઘણા steps હોઈ શકે. README ઉદાહરણમાં **1 turn = 2 steps**.
+
+**કેમ બે steps?** Step 1 ના અંતે model એ text ને બદલે tool call આપ્યો. Code (`step()`) ત્યારે `null` પાછું આપે છે — એનો અર્થ "હજી પૂરું નથી". `turn()` એ જોઈને બીજો step શરૂ કરે છે. Step 2 માં tool call નથી, એટલે `{ kind: 'completed' }` — turn બંધ.
+
+#### (2) `turn/end` હંમેશા કેમ લખાય છે
+
+`turn/end` `finally` block માં છે. **`finally`** એટલે "ગમે તે થાય — સફળતા, ભૂલ, કે રદ — આ code ચાલશે જ". તેથી ચોપડામાં દરેક શરૂ થયેલા ઓર્ડરનો અંત હોય છે. પ્રકરણ 3 અને 5 માં Ctrl+C પછી પણ `turn/end {"kind":"aborted"}` દેખાય છે, અને resume આ જ જોડ પર આધાર રાખે છે.
+
+#### (3) `preStep` — વાતચીત પહેલાંની તૈયારી
+
+દરેક step પહેલાં પાંચ કામ: (1) inbox માંથી ઓર્ડર લેવો, (2) કયું model વાપરવું તે જોવું, (3) આ step માં કયા tools દેખાશે, (4) system prompt + tool schemas ભેગા કરવા, (5) `agent/pre-step` **waterfall** ચલાવવું — બીજા plugins ને ઓર્ડર બદલવાની કે નકારવાની તક.
+
+**Waterfall** = ધોધની જેમ એક પછી એક listener; દરેકે `next()` બોલાવી પાણી આગળ વહેવા દેવું પડે. `next()` ભૂલો તો ધોધ ત્યાં જ અટકે (પ્રકરણ 6 ની નિષ્ફળતા).
+
+#### (4) "જે model ને દેખાય, તે ચોપડામાં લખાય"
+
+Repository નો નિયમ: **Model-visible ⟺ logged.** Model ને જતું દરેક message પહેલાં session log માં `system/message` કે `user/message` તરીકે લખાય છે, અને પછી `session.deriveMessages()` ચોપડામાંથી history બનાવે છે. ફાયદો: કોઈ પણ request પછીથી ચોપડામાંથી **ફરી બનાવી** શકાય — resume, fork, debugging બધું આના પર ટકે છે.
+
+#### (5) Stored vs streamed — ચોપડો vs વાતો
+
+- **Stored (ચોપડો):** `turn/*`, `step/*`, `*/message`, `tool/*`, `request/*` — file માં સચવાય, reload પછી પણ રહે.
+- **Streamed (વાતો):** `agent/assistant-stream` chunk frames — model લખતું જાય તેમ UI ને ટુકડા. Process બંધ થાય તો ગયા. ફક્ત અંતનો committed `assistant/message` ચોપડામાં જાય.
+
+**યાદ-ચાવી:** "**વાત હવામાં, હિસાબ ચોપડામાં.**"
+
+#### (6) Lab કેવી રીતે key વગર ચાલે છે
+
+`dsh-llm-mock-server` એ નકલી રસોઇયો છે જે script મુજબ જવાબ આપે: પહેલી વાર "`read README.md`", બીજી વાર "ગુજરાતી સાર". `DEEPSEEK_BASE_URL` થી DeepSeek adapter ને આ નકલી રસોઇયા તરફ વાળીએ છીએ. **ધ્યાન:** સાર mock નો લખેલો છે; lab plumbing (પાઇપ-લાઇન) ચકાસે છે, model ની બુદ્ધિ નહીં.
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| Turn | એક user સંદેશનું આખું કામ | README ઓર્ડર | "આખો ઓર્ડર" |
+| Step | એક model call + તેના tools | step 1 = `read` માંગ્યું | "એક વાતચીત" |
+| Inbox | agent ને મળેલા, હજી ન લીધેલા સંદેશા | `agent.followup(...)` | "ઓર્ડર-પેટી" |
+| System prompt | model માટેના સ્થાયી નિયમો | "You are an AI agent…" | "ભોજનાલયના નિયમો" |
+| Tool schema | tool નું નામ, વર્ણન, arguments નું વર્ણન | `read(file_path, offset, limit)` | "સાધનનું લેબલ" |
+| Tool call | model ની "આ tool ચલાવો" માંગ | `read {"file_path":"README.md"}` | "કોઠારની ચિઠ્ઠી" |
+| Session event | ચોપડાની એક entry | `#17 tool/call` | "ચોપડાની લીટી" |
+| `seq` | event નો ક્રમાંક, 0 થી | `#24 turn/end` | "પાના નંબર" |
+| Waterfall event | `next()` વાળી listener સાંકળ | `agent/pre-step`, `llm/stream` | "ધોધ" |
+| Stream / chunk | જવાબ ટુકડે-ટુકડે આવવો | `chunks=13` | "ટીપે ટીપે" |
+| Mock server | scripted નકલી provider | `tool_call_success,success` | "નકલી રસોઇયો" |
+| Overlay / `--patch` | config માં ઉમેરો/બદલાવ કરતી YAML | trace plugin insert | "મેનુ પર ચિઠ્ઠી" |
+| stdout / stderr | સામાન્ય output / ભૂલ-અને-માહિતી output | જવાબ stdout માં, trace stderr માં | "થાળી / રસોડાની બૂમો" |
+
+### યાદ રાખવાની રીતો
+
+- **"2-1-25-4":** 2 model calls, 1 tool call, 25 tools, 4 user messages. Title row ચાલુ → 3 calls.
+- **ચાર user messages "કા-નિ-સ્થ-કૌ":** **કા**મ (task), ઘરના **નિ**યમ (agent-instructions), **સ્થ**ળ-સમય (runtime-context), **કૌ**શલ્ય-યાદી (skill-catalog).
+- **Turn ના પાંચ અંત "પૂ-ભૂ-ર-રો-મ":** **પૂ**ર્ણ (completed), **ભૂ**લ (error), **ર**દ (aborted), **રો**ક (blocked), **મ**ર્યાદા (max-tokens).
+- **દસ સ્ટેશનની વાર્તા:** [સમગ્ર નકશો — વિભાગ 5](overview-samagra-naksho.md) માંની table મોઢે બોલો.
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "Model ને પાછલી વાત યાદ રહે છે." | દરેક call માં history ચોપડામાંથી ફરી મોકલાય છે. |
+| "Tool નિષ્ફળ જાય તો turn તૂટે." | નિષ્ફળતા પણ `tool/result` (`isError: true`) છે; step 2 ચાલે છે. |
+| "Streamed chunks file માં સચવાય છે." | ફક્ત committed `assistant/message` (embedded compact stream સાથે). |
+| "README ઉદાહરણમાં હંમેશા 2 calls." | Base bundle નો title generator ચાલુ હોય તો 3. |
+
+### પુનરાવર્તન કાર્ડ
+
+<details><summary>1. README ઉદાહરણમાં કેટલા turn અને step?</summary>
+
+1 turn, 2 steps, 2 model calls (title row બંધ હોય ત્યારે).
+</details>
+
+<details><summary>2. Step 1 પછી `step()` શું return કરે અને કેમ?</summary>
+
+`null`: tool calls હતા, તેથી turn પૂરો નથી; `turn()` step 2 શરૂ કરે છે.
+</details>
+
+<details><summary>3. Call #2 માં 7 messages કયા?</summary>
+
+System, 4 user messages, assistant નો tool-call, અને tool result.
+</details>
+
+<details><summary>4. Model history કઈ function બનાવે છે?</summary>
+
+`session.deriveMessages()`, `buildRequest` ની અંદર — ચોપડામાંથી.
+</details>
+
+<details><summary>5. Session file નું નામ અને format?</summary>
+
+`session.v4.jsonl.zstd`: format version 4, એક line = એક event, zstd-compressed.
+</details>
+
+### મિત્રને સમજાવો (3 મિનિટ)
+
+ભોજનાલયની ઉપમા વાપરીને મિત્રને સમજાવો કે README ઉદાહરણમાં રસોઇયાને **બે વાર** કેમ પૂછવું પડ્યું. પછી એ જ વાત ઉપમા વગર, ફક્ત `turn`, `step`, `tool call` શબ્દોથી કહો.
+
+### આગલા પ્રકરણ સાથે જોડાણ
+
+તમે ઓર્ડરની મુસાફરી જોઈ, પણ એક પ્રશ્ન બાકી છે: **આ વેઈટર, રસોઇયો, કોઠાર — બધા ભોજનાલયમાં આવ્યા કેવી રીતે?** પ્રકરણ 2 એ startup ની વાર્તા છે: profile, patches, Cordis, `inject`. પ્રકરણ 1 નો `trace-events.ts` અને `run-mock.sh` ત્યાં અને પછીનાં બધાં પ્રકરણોમાં ફરી વપરાશે.
 
 ---
 

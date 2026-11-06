@@ -16,8 +16,11 @@
 
 ## વિષયસૂચિ
 
+> **નવું:** દરેક પ્રકરણના અંતે **"સરળ સમજ"** વિભાગ છે — સાદી ગુજરાતી, ભોજનાલયની ઉપમા, નવા ટેકનિકલ શબ્દોની સમજ, યાદ રાખવાની રીતો અને પુનરાવર્તન કાર્ડ. શરૂઆત [સમગ્ર નકશો](book/overview-samagra-naksho.md) થી કરો.
+
 | Level | પ્રકરણ | મુખ્ય lab |
 |---|---|---|
+| — | **[સમગ્ર નકશો — આખું પુસ્તક એક નજરે](book/overview-samagra-naksho.md)** (પહેલાં આ વાંચો) | આઠ પ્રકરણોનું જોડાણ, એક ઉપમા, યાદ-ચાવીઓ |
 | 0 | [પાયો અને પ્રથમ run](book/00-paayo-ane-pratham-run.md) | key વગર પહેલો Cordis plugin |
 | 1 | [એક requestની આખી મુસાફરી](book/01-request-ni-musafari.md) | README ઉદાહરણ: 2 model calls, `read` tool, દરેક event |
 | 2 | [Cordis અને plugin architecture](book/02-cordis-plugin-architecture.md) | `--dump-config`, ખૂટતી service, tutorial race |

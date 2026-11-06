@@ -1,5 +1,7 @@
 # પ્રકરણ 5 — Debugging, permissions અને reliability
 
+> 🧭 **નવું:** આ પ્રકરણ અઘરું લાગે તો પહેલાં નીચેનો [સરળ સમજ](#saral-samaj) વિભાગ વાંચો (ઉપમા, નવા શબ્દો, યાદ રાખવાની રીતો). આખા પુસ્તકનો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
 > **Level 5.** ચાર નક્કર નિષ્ફળતાઓ ફરી ઉત્પન્ન કરીએ — unavailable tool, invalid input, provider error, interrupted execution —
 > અને દરેકનું નિદાન source, logs, breakpoints અને tests થી કરીએ. પછી permission/sandbox ની ખરી સીમાઓ ચકાસીએ.
 
@@ -199,6 +201,169 @@ pnpm exec vitest run packages/llm/llm-retry packages/core/tools packages/fs/fs-s
 6. `maxParallelToolCalls` `volatile` હોવાનો શું અર્થ?
 
 જવાબો: [પરિશિષ્ટ D — પ્રકરણ 5](../appendix/D-lab-solutions.md#ch5).
+
+<a id="saral-samaj"></a>
+
+## સરળ સમજ — પ્રકરણ 5 સાદી ગુજરાતીમાં
+
+> આ વિભાગ નવો ઉમેરેલો છે; ઉપરનું પ્રકરણ જેમ હતું તેમ જ છે. આખો નકશો: [સમગ્ર નકશો](overview-samagra-naksho.md).
+
+### એક વાક્યમાં
+
+**પ્રકરણ 5 = ભોજનાલયની કટોકટી-તાલીમ: ખોટો ઓર્ડર, અધૂરી ચિઠ્ઠી, supplier નો ફોન ન લાગે, અને અચાનક દુકાન બંધ — દરેકને જાણી જોઈને ઉત્પન્ન કરો, નિદાન કરો; અને રસોડાની દીવાલો (sandbox) ક્યાં છે અને ક્યાં નથી તે ચકાસો.**
+
+### ભોજનાલયની ઉપમામાં
+
+| કટોકટી | ભોજનાલયમાં | Harness માં | શું થયું (lab માં) |
+|---|---|---|---|
+| A | રસોઇયો એવું સાધન માંગે જે છે જ નહીં | unknown tool | `Error: unknown tool "read_everything"`, turn ચાલુ |
+| B | ચિઠ્ઠીમાં જરૂરી વિગત જ નથી | invalid args | `missing required property "file_path"` |
+| C | supplier નો ફોન વ્યસ્ત / પાસવર્ડ ખોટો | provider error | 429 → retry → સફળ; 401 → તરત બંધ |
+| D | ઓર્ડર વચ્ચે દુકાન અચાનક બંધ | SIGINT | exit 130, ચોપડામાં `aborted` |
+
+**દીવાલો (sandbox):** "ગમે ત્યાં **જોઈ** શકો, **રાંધી** ફક્ત પોતાના રસોડામાં" — `workspace-write` mode. મોટું કામ (બહાર લખવું) કરવું હોય તો **શેઠને પૂછો** (approval) — headless માં શેઠ હાજર નથી, એટલે જવાબ "ના".
+
+**ઉપમા ક્યાં તૂટે છે:** ભોજનાલયની દીવાલ ચોરને પણ રોકે. અહીં file sandbox ફક્ત **લખવા** પર વાડ છે — **વાંચવું ખુલ્લું છે**. `read` થી `/etc/os-release` વંચાય છે. Source પોતે કહે છે: "containment, not a security boundary".
+
+### વિષય-વાર ઊંડી સમજ
+
+#### (1) Debugging ના છ સાધન
+
+| સાધન | ક્યારે | યાદ-ચાવી |
+|---|---|---|
+| Observer plugin (trace) | શું, ક્યારે, કયા ક્રમમાં | "CCTV" |
+| Stored session (`print-session --full`) | model ને **ખરેખર** શું દેખાયું | "ચોપડો" |
+| Wire capture | adapter એ HTTP પર શું મોકલ્યું | "ટપાલની નકલ" |
+| Breakpoint (`--inspect-brk`) | એક line પર અટકવું | "સમય રોકો" |
+| Upstream tests | વર્તનનો contract | "નિયમપોથી" |
+| Startup audit | plugin load નથી થતો | "હાજરીપત્રક" |
+
+**યાદ-ચાવી "સી-ચો-ટ-સ-નિ-હા":** CCTV, ચોપડો, ટપાલ, સમય, નિયમપોથી, હાજરી — "**સીધો ચોર ટપાલ સમયે નિયમ હાજર**".
+
+#### (2) ચાર નિષ્ફળતા — એક જ સિદ્ધાંત
+
+A અને B બંને **tool-level** નિષ્ફળતા છે: `tool/result` માં `isError: true`, step 2 ચાલે છે, turn `completed`. Model ને સુધારવાની તક મળે. C અને D **turn-level** છે: turn `error` કે `aborted` થી બંધ થાય.
+
+**યાદ-ચાવી:** "**સાધનની ભૂલ = ચિઠ્ઠી પાછી; ફોન કે દુકાનની ભૂલ = ઓર્ડર બંધ.**"
+
+#### (3) Retry — ક્યારે ફરી ફોન કરવો
+
+- Stream નિષ્ફળ → loop `assistant/attempt` લખે → `agent/request-error` waterfall → `llm-retry` plugin નિર્ણય લે.
+- **Retry થાય તેવા codes:** `RATE_LIMIT`, `SERVER`, `TIMEOUT`, `TRANSPORT`, ખાલી response.
+- **Retry ન થાય:** `AUTH` (ખોટી key) — ફરી ફોન કરવાથી પાસવર્ડ સાચો નહીં થાય.
+- **Backoff:** 5 વાર સુધી, 500 ms થી શરૂ, દરેક વખતે બમણું (≈0.5, 1, 2, 4, 8 s), મહત્તમ 10 s, 10% jitter.
+- Retry **એ જ step** માં થાય; `agent/pre-step` અને user message ફરી ઉમેરાતા નથી.
+
+**યાદ-ચાવી "5-અડધી-બમણું-દસ":** 5 વાર, અડધી સેકન્ડથી, બમણું કરતા, 10 સેકન્ડ સુધી. "**રેટ-સર્વર-ટાઇમ-ટ્રાન્સપોર્ટ ફરી, ઓથ કદી નહીં.**"
+
+#### (4) Cancellation — Ctrl+C ની સાંકળ
+
+```text
+Ctrl+C (SIGINT) → launcher interrupt(130) → root fiber dispose
+  → agent loop cancel(cause) → AbortController.abort()
+  → દરેક await પછી signal.throwIfAborted()
+  → turn() નો catch: reason aborted → finally: turn/end
+```
+
+Tool body ચાલુ હોય તો pipeline તેને **છોડી દેતું નથી**; body શાંત થાય પછી પરિણામ `ABORTED` બને. Exit code: SIGINT → 130, SIGTERM → 0.
+
+**યાદ-ચાવી "બંધ-રદ-ફેંક-નોંધ":** દુકાન **બંધ** → ઓર્ડર **રદ** → ભૂલ **ફેંક** → ચોપડામાં **નોંધ**.
+
+#### (5) Sandbox, approval, અને "fail closed"
+
+- **ત્રણ mode:** `read-only` (કંઈ લખી ન શકાય), `workspace-write` (ફક્ત workspace માં), `danger-full-access` (બધું). Default policy `read-only`; headless/base `workspace-write`.
+- **પાંચ પ્રયોગ:** `/etc` માં write → `FS_SANDBOX_DENIED`; escalation માંગ્યું → approval `unavailable` → ના; bash `/etc` માં → backend (`bwrap`) નથી → **command ચાલ્યો જ નહીં**; workspace બહાર read → **સફળ**; ગેરહાજર file → `FS_NOT_FOUND`.
+- **Fail closed** = નિયંત્રણ શક્ય ન હોય તો "ના" કહેવું, "ચલો ચલાવી દઈએ" નહીં.
+
+**યાદ-ચાવી "લખવા પર વાડ, વાંચવું ઉઘાડ; શેઠ નથી તો ના, વાડ નથી તો ના."**
+
+#### (6) Data boundary — model provider ને શું જાય છે
+
+દરેક request સાથે `dsh_session_log` (session log નો ભાગ) અને `dsh_plugin_packages` જાય છે, headers માં anonymous user id અને session id. Official API ને session log ન મોકલવો હોય તો `session-log-deepseek` row disable કરો. **Permission અને data બે અલગ પ્રશ્ન છે:** sandbox "શું કરી શકાય" નક્કી કરે, data boundary "શું બહાર જાય".
+
+#### (7) Concurrency
+
+Model એક સાથે ઘણા tool calls આપે તો `isConcurrencySafe` વાળા calls parallel pool માં (default મહત્તમ 10), બાકીના એક-એક. પરિણામો હંમેશા model ના ક્રમમાં ચોપડામાં.
+
+#### (8) Fix નો પુરાવો — ચાર પગલાં
+
+1. નિષ્ફળતા ફરી ઉત્પન્ન કરો. 2. Fix કરો. 3. એ જ પગલાંથી ફરી ચલાવો. 4. Fix ઉલટાવો અને નિષ્ફળતા **પાછી આવે** છે તે બતાવો.
+
+**યાદ-ચાવી "ફરી-સુધાર-ફરી-ઉલટ".**
+
+### નવા ટેકનિકલ શબ્દો — સરળ ગુજરાતીમાં
+
+| શબ્દ | સરળ અર્થ | ઉદાહરણ | યાદ-ચાવી |
+|---|---|---|---|
+| Debugging | ભૂલનું કારણ શોધવું | trace + session | "ડૉક્ટરી તપાસ" |
+| Breakpoint | debugger ને line પર રોકવું | `--inspect-brk` | "થોભો-નિશાન" |
+| Retry | નિષ્ફળ request ફરી મોકલવી | `llm/retry` event | "ફરી ફોન" |
+| Backoff | દરેક retry પહેલાં વધતી રાહ | 0.5→1→2→4→8 s | "ધીરજ બમણી" |
+| Jitter | રાહમાં થોડો random ફેરફાર | 10% | "સૌ એક સાથે ન ફોન કરે" |
+| HTTP 429 / 401 / 500 | વધુ માંગ / ઓળખ ખોટી / server ભૂલ | `rate_limit`, `auth_error` | "ભીડ / તાળું / ખામી" |
+| SIGINT / SIGTERM | Ctrl+C / સામાન્ય બંધ કરવાનો signal | exit 130 / 0 | "અચાનક / વિનંતી" |
+| AbortController | cancel signal આપતો object | `abort()` | "બંધ કરવાનું બટન" |
+| Sandbox | side effects ની મર્યાદા | `workspace-write` | "રસોડાની વાડ" |
+| Escalation | એક call માટે વધુ ખુલ્લો mode માંગવો | `sandbox_permissions` | "શેઠ પાસે રજા" |
+| Approval policy | મંજૂરી પૂછવાની નીતિ | `ask` / `never` | "શેઠને પૂછો કે નહીં" |
+| Fail closed | નિયંત્રણ ન હોય તો નકારવું | bash without `bwrap` | "શંકા હોય તો ના" |
+| bwrap / Landlock | Linux kernel ની process કેદ | sandbox-local chain | "તાળાવાળું રૂમ" |
+| Concurrency | એક સાથે અનેક કામ | parallel tool pool | "અનેક હાથ" |
+| Telemetry | ઉપયોગની માહિતી બહાર મોકલવી | OTel, `FEEDBACK_ONLY` | "અહેવાલ" |
+
+### યાદ રાખવાની રીતો
+
+- **"સીધો ચોર ટપાલ સમયે નિયમ હાજર"** — છ debugging સાધન.
+- **"સાધનની ભૂલ = ચિઠ્ઠી પાછી; ફોન/દુકાનની ભૂલ = ઓર્ડર બંધ"** — tool-level vs turn-level.
+- **"5-અડધી-બમણું-દસ"** અને **"ઓથ કદી નહીં"** — retry.
+- **"બંધ-રદ-ફેંક-નોંધ"** — cancellation સાંકળ.
+- **"લખવા પર વાડ, વાંચવું ઉઘાડ"** — sandbox ની ખરી સીમા.
+- **"ફરી-સુધાર-ફરી-ઉલટ"** — fix નો પુરાવો.
+
+### સામાન્ય ગેરસમજો
+
+| ગેરસમજ | સાચું |
+|---|---|
+| "Sandbox secrets ને બચાવે છે." | Reads ખુલ્લાં છે; disposable VM/container વાપરો (SAFETY.md). |
+| "દરેક provider error retry થાય." | `AUTH` નહીં. |
+| "Ctrl+C થી ચોપડો અધૂરો રહે." | `turn/end aborted` durable રીતે લખાય છે. |
+| "Headless માં approval prompt આવશે." | કોઈ answerer નથી; escalation હંમેશા નકારાય. |
+| "Test pass = fix સાચો." | Fix ઉલટાવો ત્યારે test fail થાય તો જ test fix ને પકડે છે. |
+
+### પુનરાવર્તન કાર્ડ
+
+<details><summary>1. Unknown tool અને invalid args — turn પર શું અસર?</summary>
+
+બંને `isError: true` tool results; step 2 ચાલે; turn `completed`.
+</details>
+
+<details><summary>2. Retryable codes કયા, અને કયો નહીં?</summary>
+
+`RATE_LIMIT`, `SERVER`, `TIMEOUT`, `TRANSPORT`, empty response; `AUTH` નહીં.
+</details>
+
+<details><summary>3. `server_error,server_error,tool_call_success,success` માં કેટલા calls?</summary>
+
+4 model calls, 2 `llm/retry`, exit 0.
+</details>
+
+<details><summary>4. Workspace બહાર `read` — bug કે design?</summary>
+
+Design: "Reads pass through untouched: every mode permits reading".
+</details>
+
+<details><summary>5. Headless માં escalation કેમ નકારાય?</summary>
+
+Approval answerer નથી; outcome `unavailable` → fail closed.
+</details>
+
+### મિત્રને સમજાવો (3 મિનિટ)
+
+"Sandbox એટલે સુરક્ષિત" — આ વાક્ય અડધું સાચું કેમ છે, તે `read /etc/os-release` ના ઉદાહરણથી મિત્રને સમજાવો, અને સાથે કહો કે બહાર લખવું કેમ રોકાયું.
+
+### આગલા પ્રકરણ સાથે જોડાણ
+
+તમે નિષ્ફળતા ઉત્પન્ન કરવી, નિદાન કરવું, અને fix ને સાબિત કરવો શીખ્યા. પ્રકરણ 6 માં આ જ કુશળતાથી **એક ખરો સુધારો** (Ctrl+C પછીનો ભ્રામક `flush on a closed handle` સંદેશો) problem statement થી regression test અને review notes સુધી લઈ જશો, અને ત્રણ extension માર્ગમાંથી સાચો પસંદ કરશો.
 
 ---
 
