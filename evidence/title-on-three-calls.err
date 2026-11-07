@@ -1,0 +1,38 @@
+[trace +   78ms] session/event #0 permission/preset
+[trace +   79ms] session/event #1 sandbox/mode
+[trace +   79ms] session/event #2 approval/policy
+[trace +   80ms] session/event #3 agent/inbox/spliced
+[trace +   81ms] session/event #4 turn/start {"turn":1}
+[trace +   82ms] session/event #5 agent/inbox/spliced
+[trace +  394ms] session/event #6 step/start {"turn":1,"step":1}
+[trace +  397ms] session/event #7 system/message
+[trace +  398ms] session/event #8 user/message
+[trace +  399ms] session/event #9 user/message
+[trace +  400ms] session/event #10 user/message
+[trace +  400ms] session/event #11 user/message
+[trace +  402ms] session/event #12 request/header
+[trace +  403ms] session/event #13 request/context
+[trace +  404ms] llm/stream call #1 deepseek-official/deepseek-flash messages=5 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  404ms] live  stream start turn=1 step=1
+[trace +  407ms] session/event #14 session/title
+[trace +  409ms] session/event #15 session/title-llm-request
+[trace +  409ms] llm/stream call #2 deepseek-official/deepseek-flash messages=1 tools=[]
+[trace +  453ms] session/event #16 session-log-deepseek/delivery-accepted
+[trace +  462ms] session/event #17 assistant/message
+[trace +  462ms] live  stream end chunks=7 -> assistant/message #17
+[trace +  464ms] session/event #18 tool/call name=read arguments={"file_path":"README.md"}
+[trace +  467ms] session/event #19 session-log-deepseek/delivery-accepted
+[trace +  469ms] session/event #20 session/title
+[trace +  479ms] tools/result read isError=false chars=3175
+[trace +  480ms] session/event #21 tool/result
+[trace +  481ms] session/event #22 step/end {"turn":1,"step":1}
+[trace +  496ms] session/event #23 step/start {"turn":1,"step":2}
+[trace +  499ms] llm/stream call #3 deepseek-official/deepseek-flash messages=7 tools=[bash,create_goal,edit,get_goal,glob,grep,interrupt_agent,job_kill,job_list,job_o…]
+[trace +  499ms] live  stream start turn=1 step=2
+[trace +  507ms] session/event #24 session-log-deepseek/delivery-accepted
+[trace +  511ms] session/event #25 assistant/message
+[trace +  511ms] live  stream end chunks=13 -> assistant/message #25
+[trace +  511ms] session/event #26 step/end {"turn":1,"step":2}
+[trace +  511ms] session/event #27 turn/end reason={"kind":"completed"}
+[trace +  550ms] dispose: total llm/stream calls = 3
+dsh exit: 0

@@ -22,6 +22,7 @@ LINK = re.compile(r'(?<!!)\[[^\]]*\]\(([^)\s]+)\)')
 def md_files():
     files = [ROOT / 'README.md', ROOT / 'labs' / 'README.md']
     files += sorted((ROOT / 'book').glob('*.md')) + sorted((ROOT / 'appendix').glob('*.md'))
+    files += sorted((ROOT / 'story').glob('*.md'))
     files += sorted((ROOT / 'labs').rglob('*.md'))
     return list(dict.fromkeys(files))
 
@@ -49,7 +50,7 @@ def main():
     elif fresh.stdout != (ROOT / 'appendix' / 'citations.generated.md').read_text(encoding='utf-8'):
         errors.append('appendix/citations.generated.md is stale; regenerate it')
 
-    chapters = sorted((ROOT / 'book').glob('*.md')) + sorted((ROOT / 'appendix').glob('*.md'))
+    chapters = sorted((ROOT / 'book').glob('*.md')) + sorted((ROOT / 'appendix').glob('*.md')) + sorted((ROOT / 'story').glob('*.md'))
     before = {p: p.read_text(encoding='utf-8') for p in chapters}
     rd = subprocess.run([sys.executable, str(ROOT / 'tools' / 'refdefs.py'), *map(str, chapters)], capture_output=True, text=True)
     if rd.returncode != 0:

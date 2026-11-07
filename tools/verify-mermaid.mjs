@@ -20,7 +20,7 @@ mermaid.initialize({ startOnLoad: false })
 
 let blocks = 0
 const failures = []
-for (const dir of ['book', 'appendix']) {
+for (const dir of ['book', 'appendix', 'story']) {
   for (const name of readdirSync(join(book, dir)).filter(n => n.endsWith('.md')).sort()) {
     const text = readFileSync(join(book, dir, name), 'utf8')
     for (const match of text.matchAll(/```mermaid\n([\s\S]*?)```/g)) {
