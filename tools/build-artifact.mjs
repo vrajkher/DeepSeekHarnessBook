@@ -18,6 +18,13 @@ const VIEWS = [
   ['README.md', 'top', 'શરૂઆત', 'Cover'],
   ['book/overview-samagra-naksho.md', 'overview', 'સમગ્ર નકશો', 'પહેલાં વાંચો'],
   ['story/01-bhojanalay-no-pehlo-divas.md', 'story1', 'હાર્નેસ ભોજનાલયનો પહેલો દિવસ', 'વાર્તા 1'],
+  ['story/02-hr-manager-ni-diary.md', 'story2', 'HR મેનેજરની ડાયરી', 'વાર્તા 2'],
+  ['story/03-kothar-dubhashiyo-chopdo.md', 'story3', 'કોઠાર, દુભાષિયો અને ચોપડો', 'વાર્તા 3'],
+  ['story/04-paheli-bharti.md', 'story4', 'પહેલી ભરતી', 'વાર્તા 4'],
+  ['story/05-katokati-no-divas.md', 'story5', 'કટોકટીનો દિવસ', 'વાર્તા 5'],
+  ['story/06-bhojanalay-ma-sudharo.md', 'story6', 'ભોજનાલયમાં સુધારો', 'વાર્તા 6'],
+  ['story/07-sanj-no-hisab.md', 'story7', 'સાંજનો હિસાબ', 'વાર્તા 7'],
+  ['story/README.md', 'story-index', 'વાર્તા આવૃત્તિ: અનુક્રમ', 'વાર્તા'],
   ['book/00-paayo-ane-pratham-run.md', 'ch0', 'પાયો અને પ્રથમ run', 'Level 0'],
   ['book/01-request-ni-musafari.md', 'ch1', 'એક requestની આખી મુસાફરી', 'Level 1'],
   ['book/02-cordis-plugin-architecture.md', 'ch2', 'Cordis અને plugin architecture', 'Level 2'],
@@ -53,6 +60,16 @@ function rewriteHref(href, file, view) {
 
 const sections = []
 const toc = []
+// Story views: colour each scene label (કથા, ટેકનિકલ નામ, ક્યાં, …) so the eye can tell story from fact.
+const STORY_LABELS = [
+  ['ઉપમા', 'u'], ['કથા', 'k'], ['ટેકનિકલ નામ', 't'], ['ક્યાં', 'w'], ['કેવી રીતે', 'h'], ['શા માટે', 'y'],
+  ['Expert નજર', 'e'], ['ચોપડામાં', 'l'], ['Terminal માં', 'l'], ['Wire પર', 'l'], ['યાદ-ચાવી', 'm'], ['યાદ રાખો', 'm'],
+]
+const colorStoryLabels = html => html.replace(/<strong>([^]*?)<\/strong>/g, (m, inner) => {
+  const hit = STORY_LABELS.find(([label]) => inner.startsWith(label))
+  return hit ? `<strong class="lbl lbl-${hit[1]}">${inner}</strong>` : m
+})
+
 for (const [file, view, title, eyebrow] of VIEWS) {
   let h = 0
   const heads = []
@@ -84,6 +101,7 @@ for (const [file, view, title, eyebrow] of VIEWS) {
   let html = await marked.parse(md)
   html = html.replace(/<table>/g, '<div class="table-wrap"><table>').replace(/<\/table>/g, '</table></div>')
   html = html.replace(/<a id="([^"]+)"><\/a>/g, (_m, a) => `<span class="anchor" id="${anchorId(view, a)}"></span>`)
+  if (view.startsWith('story')) html = colorStoryLabels(html)
   sections.push(`<section class="part" id="${view}" aria-labelledby="${view}-h1">\n${html}</section>`)
   toc.push({ view, title, eyebrow, heads })
 }
