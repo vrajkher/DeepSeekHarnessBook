@@ -34,6 +34,19 @@ for (const dir of ['book', 'appendix']) {
     }
   }
 }
+// Story edition (story/) — added as a separate pass so the original loop stays unchanged.
+for (const name of readdirSync(join(book, 'story')).filter(n => n.endsWith('.md')).sort()) {
+  const text = readFileSync(join(book, 'story', name), 'utf8')
+  for (const match of text.matchAll(/```mermaid\n([\s\S]*?)```/g)) {
+    blocks++
+    const line = text.slice(0, match.index).split('\n').length
+    try {
+      await mermaid.parse(match[1], { suppressErrors: false })
+    } catch (error) {
+      failures.push(`story/${name}:${line} ${String(error?.message ?? error).split('\n')[0]}`)
+    }
+  }
+}
 for (const f of failures) console.error('MERMAID', f)
 console.log(`verify-mermaid: ${blocks} block(s), ${failures.length} failure(s)`)
 process.exit(failures.length ? 1 : 0)

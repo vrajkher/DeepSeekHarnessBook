@@ -95,6 +95,31 @@ details > summary { cursor: pointer; font-weight: 600; }
 details[open] > summary { margin-bottom: 0.4rem; }
 details > p:last-child { margin-bottom: 0.2rem; }
 .anchor { display: block; position: relative; top: -1rem; }
+/* Story edition: coloured scene labels (tokens per theme). */
+:root {
+  --lbl-k: #a24a07; --lbl-k-bg: #fdf0e3; --lbl-t: #1d4ed8; --lbl-t-bg: #e7eefc; --lbl-w: #0f6b63; --lbl-w-bg: #e2f4f1;
+  --lbl-h: #6d28d9; --lbl-h-bg: #f0e9fd; --lbl-y: #15703a; --lbl-y-bg: #e5f4ea; --lbl-u: #b91c1c; --lbl-u-bg: #fbe9e9;
+  --lbl-e: #8a3c0b; --lbl-e-bg: #fbf1d9; --lbl-l: #475569; --lbl-l-bg: #eceff3; --lbl-m: #b0175a; --lbl-m-bg: #fbe7f0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --lbl-k: #fdba74; --lbl-k-bg: #3a2414; --lbl-t: #93b4ff; --lbl-t-bg: #1c2645; --lbl-w: #5eead4; --lbl-w-bg: #12312d;
+    --lbl-h: #c4a5ff; --lbl-h-bg: #2a1f45; --lbl-y: #86efac; --lbl-y-bg: #14301e; --lbl-u: #fca5a5; --lbl-u-bg: #3b1717;
+    --lbl-e: #fcd34d; --lbl-e-bg: #3a2d10; --lbl-l: #cbd5e1; --lbl-l-bg: #262c36; --lbl-m: #f9a8d4; --lbl-m-bg: #3b1528;
+  }
+}
+:root[data-theme="dark"] {
+  --lbl-k: #fdba74; --lbl-k-bg: #3a2414; --lbl-t: #93b4ff; --lbl-t-bg: #1c2645; --lbl-w: #5eead4; --lbl-w-bg: #12312d;
+  --lbl-h: #c4a5ff; --lbl-h-bg: #2a1f45; --lbl-y: #86efac; --lbl-y-bg: #14301e; --lbl-u: #fca5a5; --lbl-u-bg: #3b1717;
+  --lbl-e: #fcd34d; --lbl-e-bg: #3a2d10; --lbl-l: #cbd5e1; --lbl-l-bg: #262c36; --lbl-m: #f9a8d4; --lbl-m-bg: #3b1528;
+}
+.lbl { border-radius: 4px; padding: 0.05rem 0.4rem; font-weight: 650; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.lbl-k { color: var(--lbl-k); background: var(--lbl-k-bg); } .lbl-t { color: var(--lbl-t); background: var(--lbl-t-bg); }
+.lbl-w { color: var(--lbl-w); background: var(--lbl-w-bg); } .lbl-h { color: var(--lbl-h); background: var(--lbl-h-bg); }
+.lbl-y { color: var(--lbl-y); background: var(--lbl-y-bg); } .lbl-u { color: var(--lbl-u); background: var(--lbl-u-bg); }
+.lbl-e { color: var(--lbl-e); background: var(--lbl-e-bg); } .lbl-l { color: var(--lbl-l); background: var(--lbl-l-bg); }
+.lbl-m { color: var(--lbl-m); background: var(--lbl-m-bg); }
+.part[id^="story"] h2 { border-left: 4px solid var(--lbl-k); padding-left: 0.6rem; }
 
 @media (max-width: 860px) {
   .shell { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding-block: 0.75rem 3rem; }

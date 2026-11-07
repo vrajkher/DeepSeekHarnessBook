@@ -21,6 +21,7 @@
 | Level | પ્રકરણ | મુખ્ય lab |
 |---|---|---|
 | — | **[સમગ્ર નકશો — આખું પુસ્તક એક નજરે](book/overview-samagra-naksho.md)** (પહેલાં આ વાંચો) | આઠ પ્રકરણોનું જોડાણ, એક ઉપમા, યાદ-ચાવીઓ |
+| — | **[વાર્તા આવૃત્તિ](story/README.md)** (ધોરણ 12 થી શરૂઆત) | "હાર્નેસ ભોજનાલય" ની વાર્તામાં આખું harness: ક્યાં, કેવી રીતે, શા માટે |
 | 0 | [પાયો અને પ્રથમ run](book/00-paayo-ane-pratham-run.md) | key વગર પહેલો Cordis plugin |
 | 1 | [એક requestની આખી મુસાફરી](book/01-request-ni-musafari.md) | README ઉદાહરણ: 2 model calls, `read` tool, દરેક event |
 | 2 | [Cordis અને plugin architecture](book/02-cordis-plugin-architecture.md) | `--dump-config`, ખૂટતી service, tutorial race |
