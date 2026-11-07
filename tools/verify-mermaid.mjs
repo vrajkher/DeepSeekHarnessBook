@@ -20,7 +20,7 @@ mermaid.initialize({ startOnLoad: false })
 
 let blocks = 0
 const failures = []
-for (const dir of ['book', 'appendix', 'story']) {
+for (const dir of ['book', 'appendix']) {
   for (const name of readdirSync(join(book, dir)).filter(n => n.endsWith('.md')).sort()) {
     const text = readFileSync(join(book, dir, name), 'utf8')
     for (const match of text.matchAll(/```mermaid\n([\s\S]*?)```/g)) {
@@ -31,6 +31,19 @@ for (const dir of ['book', 'appendix', 'story']) {
       } catch (error) {
         failures.push(`${dir}/${name}:${line} ${String(error?.message ?? error).split('\n')[0]}`)
       }
+    }
+  }
+}
+// Story edition (story/) — added as a separate pass so the original loop stays unchanged.
+for (const name of readdirSync(join(book, 'story')).filter(n => n.endsWith('.md')).sort()) {
+  const text = readFileSync(join(book, 'story', name), 'utf8')
+  for (const match of text.matchAll(/```mermaid\n([\s\S]*?)```/g)) {
+    blocks++
+    const line = text.slice(0, match.index).split('\n').length
+    try {
+      await mermaid.parse(match[1], { suppressErrors: false })
+    } catch (error) {
+      failures.push(`story/${name}:${line} ${String(error?.message ?? error).split('\n')[0]}`)
     }
   }
 }
